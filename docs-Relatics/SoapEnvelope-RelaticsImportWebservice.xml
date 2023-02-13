@@ -1,0 +1,31 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<SOAP-ENV:Body>
+		<Import xmlns="http://www.relatics.com/">
+			<Operation>insertDocuments</Operation>
+			<Identification>
+				<Identification>
+					<!-- Workspace ID -->
+					<Workspace>87382-287289-2873873-03920923-0923</Workspace>
+					<!-- or, Workspace URL(postfix) -->
+					<Workspace>Holidays2011</Workspace>
+				</Identification>
+			</Identification>
+			<Authentication>
+				<Authentication>
+					<!-- leave empty -->
+					<!-- or -->
+					<Entrycode>12345</Entrycode>
+				</Authentication>
+			</Authentication>
+			<Filename>
+				 <!--  example: icons.zip.                                                                                           --> 
+				 <!--  1. this filename is included in the imoprt log to denote which data was imported, and                         -->
+				 <!--  2. the filename extension determines whether the file is unzipped before it is offered to the import (or not) -->
+			</Filename> 
+			<Data>
+				 <!--  the file to import, refer to https://kb.relaticsonline.com/published//ShowObject.aspx?Key=c57bfd5e-20df-e311-9406-00155de0940e -->
+				 <!--  use Base64 format to include file here, refer to http://nl.wikipedia.org/wiki/Base64                                           -->
+			</Data>
+		</Import>
+	</SOAP-ENV:Body>
+ </SOAP-ENV:Envelope>

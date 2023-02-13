@@ -1,0 +1,30 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<SOAP-ENV:Body>
+		<GetResult xmlns="http://www.relatics.com/">
+			<Operation>GetAllEmployees</Operation>
+			<Identification>
+				<Identification>
+					<!-- Workspace ID -->
+					<Workspace>87382-287289-2873873-03920923-0923</Workspace>
+					<!-- or, Workspace URL(postfix) -->
+					<Workspace>Holidays2011</Workspace>
+				</Identification>
+			</Identification>
+			<Parameters> 
+				<Parameters>
+					<Parameter Name="Param1" Value="open"/>
+					<Parameter Name="Param2" Value="module"/>
+				</Parameters>
+			</Parameters> 
+			<!-- skip the Parameters part, in case there are no parameters. NB: avoid <Parameters/>  -->
+			<Authentication>
+				<Authentication>
+					<!-- leave epmty -->
+					<!-- also leave empty for Oauth2.0 Client Credentials flow authentication -->
+					<!-- or -->
+					<Entrycode>12345</Entrycode>
+				</Authentication>
+			</Authentication>
+		</GetResult>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
