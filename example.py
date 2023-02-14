@@ -4,7 +4,16 @@ Some examples on how to use the package
 import logging
 
 from pyrelatics_webservices import ClientCredential, RelaticsWebservices
-from pyrelatics_webservices.config import SAMPLE_CLIENT_ID, SAMPLE_CLIENT_SECRET, SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID
+
+# pylint: disable=E0401,E0611
+from pyrelatics_webservices.config import (  # type: ignore
+    SAMPLE_CLIENT_ID,
+    SAMPLE_CLIENT_SECRET,
+    SAMPLE_COMPANY,
+    SAMPLE_WORKSPACE_ID,
+)
+
+# pylint: enable=E0401,E0611
 
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
@@ -40,7 +49,7 @@ relatics_webservice = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 # )
 # print(ccc)
 
-
+relatics_webservice.keep_zip_file = True
 # ddd = relatics_webservice.run_import(
 #     operation_name="importeerActiesEntrycode",
 #     data=[
@@ -92,7 +101,6 @@ fff = relatics_webservice.run_import(
         "sample-data\\pexels-ksenia-chernaya-3965543.jpg",
         # "sample-data\\pexels-pavel-danilyuk-8442886.jpg",
     ],
-    keep_zip_file=True,
 )
 print("\n\n#############################################   RESULT   #############################################")
 print(fff)

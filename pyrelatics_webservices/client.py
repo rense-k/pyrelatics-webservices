@@ -98,7 +98,6 @@ class ClientCredential:
         Returns:
             _type_: _description_
         """
-        # TODO: Add Error handling
         requested_on = datetime.datetime.now()
         auth_credentials = base64.b64encode(bytes(f"{self.client_id}:{self.client_secret}", "utf-8"))
         payload = "grant_type=client_credentials"
@@ -124,7 +123,8 @@ class ClientCredential:
             #   * An incorrect client_secret is submitted
             #   * The client_id is disabled in Relatics
             raise RuntimeError(f"Token request failed: {response['error']} ({response['error_description']})")
-        elif "access_token" not in response:
+
+        if "access_token" not in response:
             raise KeyError("Token request failed: No access_token was given")
 
         # Store the token for later use
@@ -132,8 +132,6 @@ class ClientCredential:
             "token": response["access_token"],
             "expires_on": requested_on + datetime.timedelta(seconds=response["expires_in"]),
         }
-
-        return None
 
 
 class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
@@ -196,6 +194,25 @@ class RelaticsWebservices:
         self.workspace_id = workspace_id
         self.identification = {"Identification": {"Workspace": workspace_id}}
         self.user_agent = user_agent
+        self.keep_zip_file = False
+
+    def _check_operation_name(self, operation_name: str) -> None:
+        if operation_name == "":
+            raise ValueError("Supplied operationName is empty")
+
+    def _check_import_data(self, data: str | list[dict[str, str]]) -> None:
+        if not data:
+            # Above "if" checks for both empty str or empty list,
+            # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
+            raise ValueError("Supplied data is empty")
+
+    def _generate_auth_parameter(self, authentication: None | str | ClientCredential = None) -> dict:
+        if isinstance(authentication, str):
+            auth = {"Authentication": {"Entrycode": authentication}}
+        else:
+            auth = {"Authentication": {}}  # Default value, because Relatics doesn't like this to be empty
+
+        return auth
 
     def get_result(
         self,
@@ -213,6 +230,9 @@ class RelaticsWebservices:
                              * str for entryCode authentication or
                              * ClientCredential for OAuth2 client credentials
         """
+        # Basic check of mandatory arguments
+        self._check_operation_name(operation_name=operation_name)
+
         headers = {"User-Agent": self.user_agent}
         client = Client(self.wsdl_url)
 
@@ -220,16 +240,9 @@ class RelaticsWebservices:
         if parameters is not None:
             client.set_options(plugins=[AddParametersPlugin(parameters)])
 
-        # Generate Authentication argument for different authentication types
-        if isinstance(authentication, str):
-            auth = {"Authentication": {"Entrycode": authentication}}
-        else:
-            auth = {"Authentication": {}}  # Default value, because Relatics doesn't like this to be empty
-
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):
-            token = authentication.get_token(self.hostname)
-            headers["Authorization"] = f"Bearer {token}"
+            headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
 
         client.set_options(headers=headers)
 
@@ -237,12 +250,67 @@ class RelaticsWebservices:
         # GetResult(xs:string Operation, Identification Identification, Parameters Parameters,
         #           Authentication Authentication)
         result = client.service.GetResult(
-            Operation=operation_name, Identification=self.identification, Parameters=None, Authentication=auth
+            Operation=operation_name,
+            Identification=self.identification,
+            Parameters=None,
+            Authentication=self._generate_auth_parameter(authentication),
         )
 
-        # TODO: Do some checking of the result
+        # Do some checking of the result
 
         return result
+
+    def _generate_data_xml(self, data: list[dict[str, str]]) -> Document:
+        # Build data xml
+        root = Element("Import")
+        doc = Document(root)
+
+        for data_row in data:
+            row = Element("Row", parent=root)
+            for key, value in data_row.items():
+                row.set(name=key, value=value)
+            root.append(row)
+
+        return doc
+
+    def _generate_zip_b64(
+        self,
+        prepared_data: str | Document,
+        documents: list[str],
+        file_basename: str,
+        file_extension: str,
+    ) -> str:
+        # Generate the full filename for the zip file
+        import_zip_path = os.path.join(tempfile.gettempdir(), f"{file_basename}.zip")
+
+        # Create the zip file
+        with zipfile.ZipFile(import_zip_path, "w") as import_zip:
+            # Add all the supplied documents
+            for document_path in documents:
+                archive_name = os.path.join("Documents", os.path.split(document_path)[1])
+                import_zip.write(filename=document_path, arcname=archive_name)
+
+            # Add the data file
+            if isinstance(prepared_data, Document):
+                import_zip.writestr(zinfo_or_arcname=f"{file_basename}.{file_extension}", data=prepared_data.str())
+            elif isinstance(prepared_data, str):
+                import_zip.write(filename=prepared_data, arcname=os.path.split(prepared_data)[1])
+
+            # log.debug(f"Zip-file created {import_zip_path}: \n{pprint.pformat(import_zip.namelist(), indent=2)}")
+            log.debug("Zip-file created %s: \n%s", import_zip_path, pprint.pformat(import_zip.namelist(), indent=2))
+
+        # Cleanup references to the ZipFile
+        del import_zip
+
+        # Convert zipfile to base64
+        with open(import_zip_path, "rb") as import_zip_file:
+            data_str = base64.b64encode(import_zip_file.read()).decode("utf-8")
+
+        # Remove the zip file from disk
+        if not self.keep_zip_file:
+            os.remove(import_zip_path)
+
+        return data_str
 
     def run_import(
         self,
@@ -251,7 +319,6 @@ class RelaticsWebservices:
         authentication: None | str | ClientCredential = None,
         file_name: None | str = None,
         documents: None | list[str] = None,
-        keep_zip_file: bool = False,
     ):
         """Retrieve results from a "Server for providing data" in Relatics, without checking any results
 
@@ -280,12 +347,8 @@ class RelaticsWebservices:
             keep_zip_file : Optionally keep the created zipfile. For debugging purpose only
         """
         # Basic check of mandatory arguments
-        if operation_name == "":
-            raise ValueError("Supplied operationName is empty")
-        if not data:
-            # Above "if" checks for both empty str or empty list,
-            # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
-            raise ValueError("Supplied data is empty")
+        self._check_operation_name(operation_name=operation_name)
+        self._check_import_data(data=data)
 
         headers = {"User-Agent": self.user_agent}
         file_extension = None
@@ -298,14 +361,7 @@ class RelaticsWebservices:
             file_extension = "xml"
 
             # Build data xml
-            root = Element("Import")
-            doc = Document(root)
-
-            for data_row in data:
-                row = Element("Row", parent=root)
-                for key, value in data_row.items():
-                    row.set(name=key, value=value)
-                root.append(row)
+            prepared_data = self._generate_data_xml(data)
 
         elif isinstance(data, str):
             # Set appropriate filename, based on the given filename in "data"
@@ -314,6 +370,8 @@ class RelaticsWebservices:
             # Validate if given extensions is supported
             if file_extension not in SUPPORTED_EXTENSIONS:
                 raise TypeError("Supplied file has unsupported file extension")
+
+            prepared_data = data
 
         else:
             raise TypeError("Invalid data supplied")
@@ -328,37 +386,13 @@ class RelaticsWebservices:
         # Choose how to create the base64 data: when document are supplied, create a zip; otherwise
         # use the file or xml data
         if documents is not None:
-            # Generate the full filename for the zip file
-            import_zip_path = os.path.join(tempfile.gettempdir(), f"{file_basename}.zip")
-
-            # Create the zip file
-            with zipfile.ZipFile(import_zip_path, "w") as import_zip:
-                # Add all the supplied documents
-                for document_path in documents:
-                    archive_name = os.path.join("Documents", os.path.split(document_path)[1])
-                    import_zip.write(filename=document_path, arcname=archive_name)
-
-                # Add the data file
-                if isinstance(data, list):
-                    import_zip.writestr(zinfo_or_arcname=f"{file_basename}.{file_extension}", data=doc.str())
-                elif isinstance(data, str):
-                    import_zip.write(filename=data, arcname=os.path.split(data)[1])
-
-                # log.debug(f"Zip-file created {import_zip_path}: \n{pprint.pformat(import_zip.namelist(), indent=2)}")
-                log.debug(
-                    "Zip-file created %s: \n%s", import_zip_path, pprint.pformat(import_zip.namelist(), indent=2)
-                )
-
-            # Cleanup references to the ZipFile
-            if not keep_zip_file:
-                del import_zip
-
-            # Convert zipfile to base64
-            with open(import_zip_path, "rb") as import_zip_file:
-                data_str = base64.b64encode(import_zip_file.read()).decode("utf-8")
-
-            # Remove the zip file from disk
-            os.remove(import_zip_path)
+            # Generate the base64 encoded zip-file
+            data_str = self._generate_zip_b64(
+                prepared_data=prepared_data,
+                documents=documents,
+                file_basename=file_basename,
+                file_extension=file_extension,
+            )
 
             # Set the file extension to zip
             file_extension = "zip"
@@ -366,23 +400,16 @@ class RelaticsWebservices:
         else:  # documents is None
             if isinstance(data, list):
                 # Convert previously generated xml to base64
-                data_str = base64.b64encode(bytes(doc.str(), "utf-8")).decode("utf-8")
+                data_str = base64.b64encode(bytes(prepared_data.str(), "utf-8")).decode("utf-8")
 
             elif isinstance(data, str):
                 # Convert supplied data file to base64
                 with open(data, "rb") as data_file:
                     data_str = base64.b64encode(data_file.read()).decode("utf-8")
 
-        # Generate Authentication argument for different authentication types
-        if isinstance(authentication, str):
-            auth = {"Authentication": {"Entrycode": authentication}}
-        else:
-            auth = {"Authentication": {}}  # Default value, because Relatics doesn't like this to be empty
-
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):
-            token = authentication.get_token(self.hostname)
-            headers["Authorization"] = f"Bearer {token}"
+            headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
 
         client.set_options(headers=headers)
 
@@ -391,12 +418,12 @@ class RelaticsWebservices:
         result = client.service.Import(
             Operation=operation_name,
             Identification=self.identification,
-            Authentication=auth,
+            Authentication=self._generate_auth_parameter(authentication),
             Filename=f"{file_basename}.{file_extension}",
             Data=data_str,
         )
 
-        # TODO: Do some checking of the result
+        # Do some checking of the result
         # (ImportResult){
         #    Export =
         #       (Export){
