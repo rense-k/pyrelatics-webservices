@@ -1,7 +1,10 @@
+"""
+Some examples on how to use the package
+"""
 import logging
 
 from pyrelatics_webservices import ClientCredential, RelaticsWebservices
-from pyrelatics_webservices.config import *
+from pyrelatics_webservices.config import SAMPLE_CLIENT_ID, SAMPLE_CLIENT_SECRET, SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID
 
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
@@ -14,23 +17,23 @@ cc = ClientCredential(
     client_id=SAMPLE_CLIENT_ID,
     client_secret=SAMPLE_CLIENT_SECRET,
 )
-foo = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
+relatics_webservice = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 
-# aaa = foo.get_result(
+# aaa = relatics_webservice.get_result(
 #     operation_name="getActiesEntrycode",
 #     parameters={"param1": "Hallo123_EntryCode"},
 #     authentication="B7CAA7A9F27BCA0B6586A607DEDE31F0",
 # )
 # print(aaa)
 
-# bbb = foo.get_result(
+# bbb = relatics_webservice.get_result(
 #     operation_name="getActiesOauth2",
 #     parameters={"param1": "Hallo123_Oauth2"},
 #     authentication=cc,
 # )
 # print(bbb)
 
-# ccc = foo.get_result(
+# ccc = relatics_webservice.get_result(
 #     operation_name="getActiesNoAuth",
 #     parameters={"param1": "Hallo123_NoAuth"},
 #     authentication=None,
@@ -38,7 +41,7 @@ foo = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 # print(ccc)
 
 
-# ddd = foo.run_import(
+# ddd = relatics_webservice.run_import(
 #     operation_name="importeerActiesEntrycode",
 #     data=[
 #         {"name": "Actie EntryCode 01", "description": "Testing 12345"},
@@ -49,7 +52,7 @@ foo = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 # )
 # print(ddd)
 
-# eee = foo.run_import(
+# eee = relatics_webservice.run_import(
 #     operation_name="importeerActiesOAuth2Client",
 #     data=[
 #         {"name": "Actie OAuth2 01", "description": "Testing 12345"},
@@ -60,7 +63,7 @@ foo = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 # )
 # print(eee)
 
-fff = foo.run_import(
+fff = relatics_webservice.run_import(
     operation_name="importeerActiesNoAuth",
     # data=[
     #     {"name": "Actie NoAuth 01", "description": "Testing 12345"},
@@ -68,8 +71,16 @@ fff = foo.run_import(
     # ],
     # data="sample-data\\sample_without_references.xlsx",
     # data=[
-    #     {"name": "Actie Ref 01", "description": "Testing 12345", "Reference": "sample-data\\cms.zeEf4OrA-collection_cover.jpeg"},
-    #     {"name": "Actie Ref 02", "description": "Testing 23456", "Reference": "sample-data\\pexels-ksenia-chernaya-3965543.jpg"},
+    #     {
+    #         "name": "Actie Ref 01",
+    #         "description": "Testing 12345",
+    #         "Reference": "sample-data\\cms.zeEf4OrA-collection_cover.jpeg",
+    #     },
+    #     {
+    #         "name": "Actie Ref 02",
+    #         "description": "Testing 23456",
+    #         "Reference": "sample-data\\pexels-ksenia-chernaya-3965543.jpg",
+    #     },
     # ],
     data="sample-data\\sample_with_references.xlsx",
     authentication=None,

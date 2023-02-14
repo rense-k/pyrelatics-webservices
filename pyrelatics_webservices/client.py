@@ -1,3 +1,16 @@
+"""_summary_
+
+Raises:
+    RuntimeError: _description_
+    RuntimeError: _description_
+    ValueError: _description_
+    ValueError: _description_
+    TypeError: _description_
+    TypeError: _description_
+
+Returns:
+    _type_: _description_
+"""
 import base64
 import datetime
 import http.client
@@ -26,31 +39,66 @@ SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
 
 
 class ClientCredential:
+    """
+    Class containing OAuth2 client credentials and helper methods to get a token from the Relatics host.
+
+    Args:
+        client_id : The OAuth2 client_id
+        client_secret : The OAuth2 client_secret
+    """
+
     def __init__(self, client_id: str, client_secret: str):
         self.client_id = client_id
         self.client_secret = client_secret
         self.tokens: dict(str, dict(str, str)) = {}
 
-        # self.tokens[base_domain] = {
+        # self.tokens[hostname] = {
         #     "token": "string with the actual token",
         #     "expires_on": datetime object with the expire time,
         # }
 
-    def getToken(self, base_domain: str, force_refresh: bool = False, user_agent: str = USER_AGENT) -> str:
+    def get_token(self, hostname: str, force_refresh: bool = False, user_agent: str = USER_AGENT) -> str:
+        """
+        Get the token for the given hostname
+
+        Args:
+            hostname : The Relatics hostname from where the token should be get.
+            force_refresh : When True, force a new token to be requested, instead of trying to reuse an
+                            existing token. Defaults to False.
+            user_agent : The user-agent used in the http request to Relatics. Since this name will show up in the
+                         logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
+
+        Returns:
+            str: _description_
+        """
         if (
             force_refresh is True
-            or base_domain not in self.tokens
-            or (self.tokens[base_domain]["expires_on"] - datetime.datetime.now()).seconds <= 300
+            or hostname not in self.tokens
+            or (self.tokens[hostname]["expires_on"] - datetime.datetime.now()).seconds <= 300
         ):
-            log.info(f"No previous token for {base_domain}, retrieving new token")
-            self.retrieveToken(base_domain, user_agent)
+            log.info("No previous token for %s, retrieving new token", hostname)
+            self.retrieve_token(hostname, user_agent)
         else:
-            log.info(f"Reuse previous token for {base_domain}")
+            log.info("Reuse previous token for %s", hostname)
 
-        return self.tokens[base_domain]["token"]
+        return self.tokens[hostname]["token"]
 
-    def retrieveToken(self, base_domain: str, user_agent: str = USER_AGENT) -> None:
-        # TODO: Error handling
+    def retrieve_token(self, hostname: str, user_agent: str = USER_AGENT) -> None:
+        """_summary_
+
+        Args:
+            hostname : The Relatics hostname from where the token should be get.
+            user_agent : The user-agent used in the http request to Relatics. Since this name will show up in the
+                         logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
+
+        Raises:
+            RuntimeError: When Relatics sends back an error response
+            KeyError: When there is no token in the response from Relatics
+
+        Returns:
+            _type_: _description_
+        """
+        # TODO: Add Error handling
         requested_on = datetime.datetime.now()
         auth_credentials = base64.b64encode(bytes(f"{self.client_id}:{self.client_secret}", "utf-8"))
         payload = "grant_type=client_credentials"
@@ -60,28 +108,27 @@ class ClientCredential:
             "User-Agent": user_agent,
         }
 
-        conn = http.client.HTTPSConnection(base_domain)
+        conn = http.client.HTTPSConnection(hostname)
         conn.request("POST", TOKEN_PATH, payload, headers)
         res = conn.getresponse()
         data = res.read()
         response = json.loads(data.decode("utf-8"))
 
-        log.debug(f"Response from {TOKEN_PATH}: {pprint.pformat(response, indent=2)}")
+        # log.debug(f"Response from {TOKEN_PATH}: {pprint.pformat(response, indent=2)}")
+        log.debug("Response from %s: %s", TOKEN_PATH, pprint.pformat(response, indent=2))
 
         if "error" in response:
-            """
-            Known errors:
-            * `invalid_client` (description=_"Client not found."_). Happens when:
-              * An unknown client_id is submitted
-              * An incorrect client_secret is submitted
-              * The client_id is disabled in Relatics
-            """
-            raise Exception(f"Token request failed: {response['error']} ({response['error_description']})")
+            # Known errors:
+            # * `invalid_client` (description=_"Client not found."_). Happens when:
+            #   * An unknown client_id is submitted
+            #   * An incorrect client_secret is submitted
+            #   * The client_id is disabled in Relatics
+            raise RuntimeError(f"Token request failed: {response['error']} ({response['error_description']})")
         elif "access_token" not in response:
-            raise Exception(f"Token request failed: No access_token was given")
+            raise KeyError("Token request failed: No access_token was given")
 
         # Store the token for later use
-        self.tokens[base_domain] = {
+        self.tokens[hostname] = {
             "token": response["access_token"],
             "expires_on": requested_on + datetime.timedelta(seconds=response["expires_in"]),
         }
@@ -89,7 +136,7 @@ class ClientCredential:
         return None
 
 
-class AddParametersPlugin(MessagePlugin):
+class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
     """
     Plugin for Suds Client to add parameters to the request before sending to Relatics. Because parameters use
     attributes, they can not be defined though the default mechanisms within Suds.
@@ -111,17 +158,17 @@ class AddParametersPlugin(MessagePlugin):
                 # TypeError: 'NoneType' object is not subscriptable
                 params = context.envelope.getChild("Body")[0].getChild("Parameters")[0]
             except TypeError:
-                log.info(f"Adding parameters to SOAP request")
+                log.info("Adding parameters to SOAP request")
                 root = context.envelope.getChild("Body")[0]
                 root_prefix = root.findPrefix("http://www.relatics.com/")
 
-                p1 = Element("Parameters", parent=root)
-                p1.setPrefix(root_prefix)
-                root.append(p1)
+                p_1 = Element("Parameters", parent=root)
+                p_1.setPrefix(root_prefix)
+                root.append(p_1)
 
-                p2 = Element("Parameters", parent=p1)
-                p2.setPrefix(root_prefix)
-                p1.append(p2)
+                p_2 = Element("Parameters", parent=p_1)
+                p_2.setPrefix(root_prefix)
+                p_1.append(p_2)
 
                 params = context.envelope.getChild("Body")[0].getChild("Parameters")[0]
 
@@ -129,13 +176,13 @@ class AddParametersPlugin(MessagePlugin):
 
             # Add the parameters
             for param_name, param_value in self.parameters.items():
-                e = Element("Parameter", parent=params)
-                e.setPrefix(prefix)
-                e.set(name="Name", value=param_name)
-                e.set(name="Value", value=param_value)
-                params.append(e)
+                elem = Element("Parameter", parent=params)
+                elem.setPrefix(prefix)
+                elem.set(name="Name", value=param_name)
+                elem.set(name="Value", value=param_value)
+                params.append(elem)
 
-        log.debug(f"Final SOAP envelope: \n{context.envelope.str()}")
+        log.debug("Final SOAP envelope: \n%s", context.envelope.str())
 
 
 class RelaticsWebservices:
@@ -144,8 +191,8 @@ class RelaticsWebservices:
     """
 
     def __init__(self, company_name: str, workspace_id: str, user_agent: str = USER_AGENT):
-        self.base_domain = f"{company_name.lower()}.relaticsonline.com"
-        self.wsdl_url = f"https://{self.base_domain}/DataExchange.asmx?wsdl"
+        self.hostname = f"{company_name.lower()}.relaticsonline.com"
+        self.wsdl_url = f"https://{self.hostname}/DataExchange.asmx?wsdl"
         self.workspace_id = workspace_id
         self.identification = {"Identification": {"Workspace": workspace_id}}
         self.user_agent = user_agent
@@ -181,13 +228,14 @@ class RelaticsWebservices:
 
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):
-            token = authentication.getToken(self.base_domain)
+            token = authentication.get_token(self.hostname)
             headers["Authorization"] = f"Bearer {token}"
 
         client.set_options(headers=headers)
 
         # Any parameters will be handled by the AddParametersPlugin, so don't pass them here
-        # GetResult(xs:string Operation, Identification Identification, Parameters Parameters, Authentication Authentication)
+        # GetResult(xs:string Operation, Identification Identification, Parameters Parameters,
+        #           Authentication Authentication)
         result = client.service.GetResult(
             Operation=operation_name, Identification=self.identification, Parameters=None, Authentication=auth
         )
@@ -228,7 +276,7 @@ class RelaticsWebservices:
                         no extension is given or the extension doesn't match the supplied data, the correct extension
                         will be added
             documents : Optional list of filepaths to include in the import.
-                        See https://kb.relaticsonline.com/published//ShowObject.aspx?Key=7126fb9d-58df-e311-9406-00155de0940e
+                See https://kb.relaticsonline.com/published/ShowObject.aspx?Key=7126fb9d-58df-e311-9406-00155de0940e
             keep_zip_file : Optionally keep the created zipfile. For debugging purpose only
         """
         # Basic check of mandatory arguments
@@ -265,7 +313,7 @@ class RelaticsWebservices:
 
             # Validate if given extensions is supported
             if file_extension not in SUPPORTED_EXTENSIONS:
-                raise Exception("Supplied file has unsupported file extension")
+                raise TypeError("Supplied file has unsupported file extension")
 
         else:
             raise TypeError("Invalid data supplied")
@@ -296,7 +344,10 @@ class RelaticsWebservices:
                 elif isinstance(data, str):
                     import_zip.write(filename=data, arcname=os.path.split(data)[1])
 
-                log.debug(f"Zip-file created {import_zip_path}: \n{pprint.pformat(import_zip.namelist(), indent=2)}")
+                # log.debug(f"Zip-file created {import_zip_path}: \n{pprint.pformat(import_zip.namelist(), indent=2)}")
+                log.debug(
+                    "Zip-file created %s: \n%s", import_zip_path, pprint.pformat(import_zip.namelist(), indent=2)
+                )
 
             # Cleanup references to the ZipFile
             if not keep_zip_file:
@@ -330,12 +381,13 @@ class RelaticsWebservices:
 
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):
-            token = authentication.getToken(self.base_domain)
+            token = authentication.get_token(self.hostname)
             headers["Authorization"] = f"Bearer {token}"
 
         client.set_options(headers=headers)
 
-        # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename, xs:string Data)
+        # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename,
+        #        xs:string Data)
         result = client.service.Import(
             Operation=operation_name,
             Identification=self.identification,
