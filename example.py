@@ -12,6 +12,7 @@ from pyrelatics2 import ClientCredential, RelaticsWebservices
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+
 # logging.getLogger("suds.client").setLevel(logging.DEBUG)
 logging.getLogger("pyrelatics2.client").setLevel(logging.DEBUG)
 
