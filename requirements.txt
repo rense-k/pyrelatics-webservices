@@ -1,1 +1,2 @@
-suds ~= 1.1.2
+# suds ~= 1.1.2
+suds-community ~= 1.1.2
