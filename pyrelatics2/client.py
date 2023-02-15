@@ -38,6 +38,33 @@ IMPORT_BASENAME = "pyrelatics_webservice"
 SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
 
 
+class TokenRequestError(Exception):
+    """
+    Custom exception class when the server returns an error while retrieving the OAuth2 token
+
+    Attributes:
+        error : The error string received from the server
+        error_description : The error description string received from the server
+        response_json : Dictionary with the json parsed response
+    """
+
+    def __init__(self, response_dict: dict, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.error = response_dict["error"]
+        self.error_description = response_dict["error_description"]
+        self.response_dict = response_dict
+
+        log.debug(
+            "Token request failed: %s (%s) | %s",
+            self.error,
+            self.error_description,
+            pprint.pformat(self.response_dict, indent=2),
+        )
+
+    def __str__(self) -> str:
+        return f"Token request failed: {self.error} ({self.error_description})"
+
+
 class ClientCredential:
     """
     Class containing OAuth2 client credentials and helper methods to get a token from the Relatics host.
@@ -113,7 +140,6 @@ class ClientCredential:
         data = res.read()
         response = json.loads(data.decode("utf-8"))
 
-        # log.debug(f"Response from {TOKEN_PATH}: {pprint.pformat(response, indent=2)}")
         log.debug("Response from %s: %s", TOKEN_PATH, pprint.pformat(response, indent=2))
 
         if "error" in response:
@@ -122,7 +148,7 @@ class ClientCredential:
             #   * An unknown client_id is submitted
             #   * An incorrect client_secret is submitted
             #   * The client_id is disabled in Relatics
-            raise RuntimeError(f"Token request failed: {response['error']} ({response['error_description']})")
+            raise TokenRequestError(response)
 
         if "access_token" not in response:
             raise KeyError("Token request failed: No access_token was given")
