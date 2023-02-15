@@ -1,16 +1,3 @@
-"""_summary_
-
-Raises:
-    RuntimeError: _description_
-    RuntimeError: _description_
-    ValueError: _description_
-    ValueError: _description_
-    TypeError: _description_
-    TypeError: _description_
-
-Returns:
-    _type_: _description_
-"""
 import base64
 import datetime
 import http.client
