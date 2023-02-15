@@ -3,15 +3,9 @@ Some examples on how to use the package
 """
 import logging
 
-from pyrelatics2 import ClientCredential, RelaticsWebservices
-
 # pylint: disable=E0401,E0611
-from pyrelatics2.config import (  # type: ignore
-    SAMPLE_CLIENT_ID,
-    SAMPLE_CLIENT_SECRET,
-    SAMPLE_COMPANY,
-    SAMPLE_WORKSPACE_ID,
-)
+from config import SAMPLE_CLIENT_ID, SAMPLE_CLIENT_SECRET, SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID  # type: ignore
+from pyrelatics2 import ClientCredential, RelaticsWebservices
 
 # pylint: enable=E0401,E0611
 
