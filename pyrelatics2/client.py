@@ -13,6 +13,9 @@ from suds.plugin import MessagePlugin
 from suds.sax.document import Document
 from suds.sax.element import Element
 
+from .exceptions import TokenRequestError
+from .import_result_classes import ImportResult
+
 log = logging.getLogger(__name__)
 
 # Type aliases
@@ -23,33 +26,6 @@ TOKEN_PATH = "/oauth2/token"
 USER_AGENT = "Python-pyrelatics_webservice/0.0.0"
 IMPORT_BASENAME = "pyrelatics_webservice"
 SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
-
-
-class TokenRequestError(Exception):
-    """
-    Custom exception class when the server returns an error while retrieving the OAuth2 token
-
-    Attributes:
-        error : The error string received from the server
-        error_description : The error description string received from the server
-        response_json : Dictionary with the json parsed response
-    """
-
-    def __init__(self, response_dict: dict, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.error = response_dict["error"]
-        self.error_description = response_dict["error_description"]
-        self.response_dict = response_dict
-
-        log.debug(
-            "Token request failed: %s (%s) | %s",
-            self.error,
-            self.error_description,
-            pprint.pformat(self.response_dict, indent=2),
-        )
-
-    def __str__(self) -> str:
-        return f"Token request failed: {self.error} ({self.error_description})"
 
 
 class ClientCredential:
@@ -428,7 +404,7 @@ class RelaticsWebservices:
 
         # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename,
         #        xs:string Data)
-        result = client.service.Import(
+        import_response = client.service.Import(
             Operation=operation_name,
             Identification=self.identification,
             Authentication=self._generate_auth_parameter(authentication),
@@ -436,42 +412,11 @@ class RelaticsWebservices:
             Data=data_str,
         )
 
-        # Do some checking of the result
-        # (ImportResult){
-        #    Export =
-        #       (Export){
-        #          _Error = "Error while reading file: Unexpected error while reading Excel-file: Value cannot be null."
-        #       }
-        #  }
-        #
-        # (ImportResult){
-        #    Import =
-        #       (Import){
-        #          Message[] =
-        #             (Message){
-        #                value = "Successfully created ImportLog."
-        #                _Time = "21:52:34"
-        #                _Result = "Progress"
-        #             },
-        #             (Message){
-        #                value = "Cleared 0 empty row(s) from the table."
-        #                _Time = "21:52:34"
-        #                _Result = "Comment"
-        #             },
-        #             (Message){
-        #                value = "The size of the import is valid: importing 6 cells"
-        #                _Time = "21:52:34"
-        #                _Result = "Comment"
-        #             },
-        #             (Message){
-        #                value = "Processing row : 00001"
-        #                _Time = "21:52:34"
-        #                _Result = "Progress"
-        #             },
-        #             (Message){
-        #                value = "Actie: Reference not found"
-        #                _Time = "21:52:34"
-        #                _Result = "Warning"
-        #             },
+        # KNOWLEDGE: Convert sudsobject to dict: client.dict(sudsobject)
 
-        return result
+        # Do some checking of the result
+        import_result = ImportResult.from_suds(import_response)
+
+        print(import_result)
+
+        return import_result
