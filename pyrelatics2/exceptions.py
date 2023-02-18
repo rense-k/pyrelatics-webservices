@@ -14,8 +14,8 @@ class TokenRequestError(Exception):
         response_json : Dictionary with the json parsed response
     """
 
-    def __init__(self, response_dict: dict, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, response_dict: dict, *args):
+        super().__init__(*args)
         self.error = response_dict["error"]
         self.error_description = response_dict["error_description"]
         self.response_dict = response_dict
@@ -29,3 +29,15 @@ class TokenRequestError(Exception):
 
     def __str__(self) -> str:
         return f"Token request failed: {self.error} ({self.error_description})"
+
+
+class InvalidOperationError(ValueError):
+    """
+    Custom exception class when a request was sent to an invalid operation.
+    """
+
+
+class InvalidWorkspaceError(ValueError):
+    """
+    Custom exception class when a request was sent for an invalid workspace.
+    """

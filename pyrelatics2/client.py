@@ -1,19 +1,23 @@
 import base64
 import datetime
 import http.client
+import io
 import json
 import logging
 import os
 import pprint
 import tempfile
+import uuid
 import zipfile
 
 from suds.client import Client
 from suds.plugin import MessagePlugin
 from suds.sax.document import Document
 from suds.sax.element import Element
+from suds.sax.text import Text
+from suds.sudsobject import Object as SudsObject
 
-from .exceptions import TokenRequestError
+from . import InvalidOperationError, InvalidWorkspaceError, TokenRequestError
 from .import_result_classes import ImportResult
 
 log = logging.getLogger(__name__)
@@ -59,7 +63,7 @@ class ClientCredential:
                          logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
 
         Returns:
-            str: _description_
+            str: Token for the given hostname
         """
         if (
             force_refresh is True
@@ -84,9 +88,6 @@ class ClientCredential:
         Raises:
             RuntimeError: When Relatics sends back an error response
             KeyError: When there is no token in the response from Relatics
-
-        Returns:
-            _type_: _description_
         """
         requested_on = datetime.datetime.now()
         auth_credentials = base64.b64encode(bytes(f"{self.client_id}:{self.client_secret}", "utf-8"))
@@ -114,7 +115,7 @@ class ClientCredential:
             raise TokenRequestError(response)
 
         if "access_token" not in response:
-            raise KeyError("Token request failed: No access_token was given")
+            raise KeyError("Token request failed: No access_token was given.")
 
         # Store the token for later use
         self.tokens[hostname] = {
@@ -139,10 +140,6 @@ class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
         if self.parameters is not None:
             # Try to get "Parameters" element, or built when missing
             try:
-                # context.envelope.getChild("Body")[0].getChild("ParametersFOOO")[0]
-                # Traceback (most recent call last):
-                # File "<string>", line 1, in <module>
-                # TypeError: 'NoneType' object is not subscriptable
                 params = context.envelope.getChild("Body")[0].getChild("Parameters")[0]
             except TypeError:
                 log.info("Adding parameters to SOAP request")
@@ -175,27 +172,60 @@ class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
 class RelaticsWebservices:
     """
     Class to communicate with Relatics webservices
+
+    Args:
+        company_subdomain : The company's subdomain (before ".relaticsonline.com")
+        workspace_id : The ID of the Relatics workspace were the request will be send to
+        user_agent : The user agent sent as part of the request. Will show up in the webservice-log in Relatics. Can
+                     be used to distinguished different applications.
+
     """
 
-    def __init__(self, company_name: str, workspace_id: str, user_agent: str = USER_AGENT):
-        self.hostname = f"{company_name.lower()}.relaticsonline.com"
+    def __init__(self, company_subdomain: str, workspace_id: str, user_agent: str = USER_AGENT):
+        self.hostname = f"{company_subdomain.lower()}.relaticsonline.com"
         self.wsdl_url = f"https://{self.hostname}/DataExchange.asmx?wsdl"
         self.workspace_id = workspace_id
         self.identification = {"Identification": {"Workspace": workspace_id}}
         self.user_agent = user_agent
-        self.keep_zip_file = False
+        self.keep_zip_file = False  # Optionally keep the created zipfile. For debugging purpose only
 
-    def _check_operation_name(self, operation_name: str) -> None:
+        # Check of mandatory arguments are given
+        if company_subdomain == "":
+            raise ValueError("The 'company_subdomain' can not be empty.")
+        if workspace_id == "":
+            raise ValueError("The 'workspace_id' can not be empty.")
+
+        # Check if workspace_id is a version ## GUID
+        id_is_uuid: bool = True
+        try:
+            uuid.UUID(workspace_id)
+        except ValueError:
+            id_is_uuid = False
+
+        if id_is_uuid is False:
+            log.warning(
+                "The supplied workspace ID isn't a GUID. Make sure the workspace has an overridden 'URL' in Relatics."
+            )
+
+    @staticmethod
+    def _handle_response_errors(suds_response) -> None:
+        """Raise Exceptions for known errors"""
+        if suds_response is not None and hasattr(suds_response, "Export") and hasattr(suds_response.Export, "_Error"):
+            error_msg = suds_response.Export._Error  # pylint: disable=W0212
+            log.info("Received an error response from the request: %s", error_msg)
+
+            if "Invalid import webservice" == error_msg:
+                raise InvalidOperationError(error_msg)
+            if "No active workspace found for the given identifier." == error_msg:
+                raise InvalidWorkspaceError(error_msg)
+
+    @staticmethod
+    def _check_operation_name(operation_name: str) -> None:
         if operation_name == "":
-            raise ValueError("Supplied operationName is empty")
+            raise ValueError("Supplied operationName is empty.")
 
-    def _check_import_data(self, data: str | list[dict[str, str]]) -> None:
-        if not data:
-            # Above "if" checks for both empty str or empty list,
-            # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
-            raise ValueError("Supplied data is empty")
-
-    def _generate_auth_parameter(self, authentication: None | str | ClientCredential = None) -> dict:
+    @staticmethod
+    def _generate_auth_parameter(authentication: None | str | ClientCredential = None) -> dict:
         if isinstance(authentication, str):
             auth = {"Authentication": {"Entrycode": authentication}}
         else:
@@ -208,8 +238,10 @@ class RelaticsWebservices:
         operation_name: str,
         parameters: ParametersOrNone = None,
         authentication: None | str | ClientCredential = None,
-    ):
-        """Retrieve results from a "Server for providing data" in Relatics, without checking any results
+        auto_handle_documents: bool = True,
+    ) -> SudsObject | tuple[SudsObject, dict[str, bytes]]:
+        """
+        Retrieve results from a "Server for providing data" in Relatics, without checking any results
 
         Args:
             operation_name : The "OperationName" of the webservice to call
@@ -218,6 +250,18 @@ class RelaticsWebservices:
                              * None for no authentication,
                              * str for entryCode authentication or
                              * ClientCredential for OAuth2 client credentials
+            auto_handle_documents : When the result contains a document node, convert them to a dict for easy access
+
+        Raises:
+            InvalidOperationError: When an invalid operation_name is supplied
+            InvalidWorkspaceError: When an invalid workspace_id is supplied
+
+        Returns:
+            suds.sudsobject.Object : The retrieved data, when there were no documents that were handled
+            tuple[suds.sudsobject.Object, dict[str, bytes]] : When document were retrieved  and handled. The first part
+                                                              of the tuple contains the retrieved data. The second part
+                                                              of the tuple contains a dictionary of the documents, with
+                                                              their filename as the key and the contents as the value.
         """
         # Basic check of mandatory arguments
         self._check_operation_name(operation_name=operation_name)
@@ -238,18 +282,47 @@ class RelaticsWebservices:
         # Any parameters will be handled by the AddParametersPlugin, so don't pass them here
         # GetResult(xs:string Operation, Identification Identification, Parameters Parameters,
         #           Authentication Authentication)
-        result = client.service.GetResult(
+        suds_response = client.service.GetResult(
             Operation=operation_name,
             Identification=self.identification,
             Parameters=None,
             Authentication=self._generate_auth_parameter(authentication),
         )
 
-        # Do some checking of the result
+        # Raise Exceptions for known errors
+        self._handle_response_errors(suds_response=suds_response)
+
+        # Handle possibly received documents
+        if (
+            auto_handle_documents
+            and hasattr(suds_response, "Report")
+            and hasattr(suds_response.Report, "Documents")
+            and isinstance(suds_response.Report.Documents, Text)
+        ):
+            # The the base64 encoded contents as a zip file
+            documents_dict: dict[str, bytes] = {}
+
+            with zipfile.ZipFile(io.BytesIO(base64.b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
+                for zipped_file in docs_zip.filelist:
+                    documents_dict[zipped_file.filename] = docs_zip.read(zipped_file.filename)
+
+            # Cleanup variable without further use
+            del docs_zip
+            if "zipped_file" in locals():
+                del zipped_file  # pylint: disable=W0631
+
+            # Delete the Document node from the sudsobject
+            del suds_response.Report.Documents
+
+            result = (suds_response, documents_dict)
+
+        else:
+            result = suds_response
 
         return result
 
-    def _generate_data_xml(self, data: list[dict[str, str]]) -> Document:
+    @staticmethod
+    def _generate_data_xml(data: list[dict[str, str]]) -> Document:
         # Build data xml
         root = Element("Import")
         doc = Document(root)
@@ -262,12 +335,13 @@ class RelaticsWebservices:
 
         return doc
 
+    @staticmethod
     def _generate_zip_b64(
-        self,
         prepared_data: str | Document,
         documents: list[str],
         file_basename: str,
         file_extension: str,
+        keep_zip_file: bool,
     ) -> str:
         # Generate the full filename for the zip file
         import_zip_path = os.path.join(tempfile.gettempdir(), f"{file_basename}.zip")
@@ -296,7 +370,7 @@ class RelaticsWebservices:
             data_str = base64.b64encode(import_zip_file.read()).decode("utf-8")
 
         # Remove the zip file from disk
-        if not self.keep_zip_file:
+        if not keep_zip_file:
             os.remove(import_zip_path)
 
         return data_str
@@ -308,8 +382,9 @@ class RelaticsWebservices:
         authentication: None | str | ClientCredential = None,
         file_name: None | str = None,
         documents: None | list[str] = None,
-    ):
-        """Retrieve results from a "Server for providing data" in Relatics, without checking any results
+        auto_parse_response: bool = True,
+    ) -> ImportResult | SudsObject:
+        """Retrieve results from a "Server for providing data" in Relatics, with checking of the results
 
         "data" can be given in the following formats:
         * a `str` with the name of the data file. Can be an Excel file or csv file.
@@ -331,13 +406,28 @@ class RelaticsWebservices:
             file_name : Filename send to Relatics. Will show up in the "Imported file" column in the import log. If
                         no extension is given or the extension doesn't match the supplied data, the correct extension
                         will be added
-            documents : Optional list of filepaths to include in the import.
+            documents : Optional list of filepaths to include in the import. Must be unique names.
                 See https://kb.relaticsonline.com/published/ShowObject.aspx?Key=7126fb9d-58df-e311-9406-00155de0940e
-            keep_zip_file : Optionally keep the created zipfile. For debugging purpose only
+            auto_parse_response : Convert the return object for easy access
+
+        Raises:
+            InvalidOperationError: When an invalid operation_name is supplied
+            InvalidWorkspaceError: When an invalid workspace_id is supplied
+
+        Returns:
+            ImportResult : Result object when the retrieved response is parsed
+            suds.sudsobject.Object : The retrieved response, when not parsed
         """
         # Basic check of mandatory arguments
         self._check_operation_name(operation_name=operation_name)
-        self._check_import_data(data=data)
+        if not data:
+            # Above "if" checks for both empty str or empty list,
+            # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
+            raise ValueError("Supplied data is empty.")
+        if documents:
+            # Detect duplicate names. Remove duplicate tails in the path with set(). Optimized with set comprehension.
+            if len({os.path.split(path)[1] for path in documents}) != len(documents):
+                raise ValueError("Duplicate filenames in document list.")
 
         headers = {"User-Agent": self.user_agent}
         file_extension = None
@@ -358,12 +448,12 @@ class RelaticsWebservices:
 
             # Validate if given extensions is supported
             if file_extension not in SUPPORTED_EXTENSIONS:
-                raise TypeError("Supplied file has unsupported file extension")
+                raise TypeError("Supplied file has unsupported file extension.")
 
             prepared_data = data
 
         else:
-            raise TypeError("Invalid data supplied")
+            raise TypeError("Invalid type of data supplied.")
 
         # Set appropriate filename
         if file_name is None:
@@ -381,6 +471,7 @@ class RelaticsWebservices:
                 documents=documents,
                 file_basename=file_basename,
                 file_extension=file_extension,
+                keep_zip_file=self.keep_zip_file,
             )
 
             # Set the file extension to zip
@@ -404,19 +495,22 @@ class RelaticsWebservices:
 
         # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename,
         #        xs:string Data)
-        import_response = client.service.Import(
+        suds_response = client.service.Import(
             Operation=operation_name,
             Identification=self.identification,
             Authentication=self._generate_auth_parameter(authentication),
             Filename=f"{file_basename}.{file_extension}",
             Data=data_str,
         )
-
         # KNOWLEDGE: Convert sudsobject to dict: client.dict(sudsobject)
 
-        # Do some checking of the result
-        import_result = ImportResult.from_suds(import_response)
+        # Raise Exceptions for known errors
+        self._handle_response_errors(suds_response=suds_response)
 
-        print(import_result)
+        if auto_parse_response:
+            # Parse the raw response into something useful
+            import_result = ImportResult.from_suds(suds_response)
+        else:
+            import_result = suds_response
 
         return import_result
