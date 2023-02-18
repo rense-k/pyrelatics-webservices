@@ -17,7 +17,7 @@ from suds.sax.element import Element
 from suds.sax.text import Text
 from suds.sudsobject import Object as SudsObject
 
-from . import InvalidOperationError, InvalidWorkspaceError, TokenRequestError
+from .exceptions import InvalidOperationError, InvalidWorkspaceError, TokenRequestError
 from .import_result_classes import ImportResult
 
 log = logging.getLogger(__name__)
