@@ -1,5 +1,7 @@
 # PyRelatics2
 
+[![PyPI version](https://badge.fury.io/py/pyrelatics2.svg)](https://badge.fury.io/py/pyrelatics2)
+
 Python package to interact with Relatics webservices.
 
 This package allows you to interact with Relatics webservices in two ways:
