@@ -1,6 +1,6 @@
 # PyRelatics2
 
-[![PyPI version](https://badge.fury.io/py/pyrelatics2.svg)](https://badge.fury.io/py/pyrelatics2)
+[![PyPI Python version][pypi-python-version-badge]][pypi-package] [![PyPI version][pypi-version-badge]][pypi-package] [![PyPI status][pypi-status-badge]][pypi-package] [![Apache-2.0 license][license-badge]][license] [![GitHub branch check state][github-workflow-status-pylint-badge]][github-link]
 
 Python package to interact with Relatics webservices.
 
@@ -188,3 +188,12 @@ Logging is available in these modules for debugging purpose: `pyrelatics2.client
       the raw base64 encoded zip containing the documents will be part of the `suds.sudsobject.Object`.
 [^2]: Parsing of the raw response can be turned off via the `auto_parse_response=false` argument. In that case the
       method will return the raw response in the form of a `suds.sudsobject.Object`
+
+[pypi-package]: https://pypi.org/project/pyrelatics2/
+[pypi-version-badge]: https://img.shields.io/pypi/v/pyrelatics2?label=pypi%20package
+[pypi-status-badge]: https://img.shields.io/pypi/status/pyrelatics2
+[pypi-python-version-badge]: https://img.shields.io/pypi/pyversions/pyrelatics2
+[github-link]: https://github.com/rense-k/pyrelatics2
+[github-workflow-status-pylint-badge]: https://img.shields.io/github/actions/workflow/status/rense-k/pyrelatics2/pylint.yml?label=pylint
+[license]: ./LICENSE
+[license-badge]: https://img.shields.io/pypi/l/pyrelatics2?color=informational
