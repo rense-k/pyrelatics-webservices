@@ -6,9 +6,6 @@
 	],
 	"settings": {
 		"python.formatting.provider": "black",
-		"editor.rulers": [
-			119
-		],
 		"[python]": {
 			"editor.formatOnSave": true,
 			"editor.rulers": [
