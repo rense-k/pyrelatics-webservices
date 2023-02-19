@@ -51,6 +51,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Topic :: Internet",
     ],
+    keywords=["Relatics", "webservice", "soap-client", "oauth2"],
     # test_suite="nose.collector",
     # tests_require=["nose"],
 )
