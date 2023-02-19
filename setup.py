@@ -54,4 +54,5 @@ setup(
     keywords=["Relatics", "webservice", "soap-client", "oauth2"],
     # test_suite="nose.collector",
     # tests_require=["nose"],
+    # tests_require=["parameterized"], << Use this one
 )
