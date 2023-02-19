@@ -42,7 +42,7 @@ parameters = {
     "sample_parameter_name_2": "sample_parameter_value_2",
 }
 
-client.get_result(operation_name="sample_operation_name", parameters=parameters, authentication=cc)
+client.get_result(operation_name="sample_operation", parameters=parameters, authentication=cc)
 ```
 
 Other forms of authentication can also be used:
@@ -54,10 +54,10 @@ client = RelaticsWebservices("company_subdomain", "workspace_id")
 
 # Authentication via entry code
 entry_code = "sample_entry_code"
-client.get_result(operation_name="sample_operation_name", parameters=None, authentication=entry_code)
+client.get_result(operation_name="sample_operation", parameters=None, authentication=entry_code)
 
 # No authentication
-client.get_result(operation_name="sample_operation_name", parameters=None, authentication=None)
+client.get_result(operation_name="sample_operation", parameters=None, authentication=None)
 ```
 
 ## Example of sending data
@@ -76,7 +76,7 @@ data = [
     {"name": "test name 2", "description": "test description 2"},
 ]
 
-client.run_import(operation_name="sample_operation_name", data=data, authentication=cc)
+client.run_import(operation_name="sample_operation", data=data, authentication=cc)
 ```
 
 Again, other forms of authentication can also be used:
@@ -89,10 +89,10 @@ data = [{"name": "test 1", "description": "desc 1"},{"name": "test 2", "descript
 
 # Authentication via entry code
 entry_code = "sample_entry_code"
-client.run_import(operation_name="sample_operation_name", data=data, authentication=entry_code)
+client.run_import(operation_name="sample_operation", data=data, authentication=entry_code)
 
 # No authentication
-client.run_import(operation_name="sample_operation_name", data=data, authentication=None)
+client.run_import(operation_name="sample_operation", data=data, authentication=None)
 ```
 
 ## Example of sending data and documents
@@ -116,7 +116,7 @@ documents=[
     "sample-data\\file_b.jpg",
 ]
 
-client.run_import(operation_name="sample_operation_name", data=data, authentication=cc, documents=documents)
+client.run_import(operation_name="sample_operation", data=data, authentication=cc, documents=documents)
 ```
 
 ## Example of sending data from a file
@@ -135,7 +135,7 @@ client = RelaticsWebservices("company_subdomain", "workspace_id")
 # Prepare the data and documents to be send
 data = "sample-data\\sample_data.xlsx"
 
-client.run_import(operation_name="sample_operation_name", data=data, authentication=cc)
+client.run_import(operation_name="sample_operation", data=data, authentication=cc)
 ```
 
 ## Result of `get_result()`
@@ -147,15 +147,15 @@ client.run_import(operation_name="sample_operation_name", data=data, authenticat
 
 ## Result of `run_import()`
 
-* The raw response of an import will be processed into a `ImportResult` object. When an error was registered, it will
-  become Falsly for easy checking. The `ImportResult` object will contain all the messages, including properties
-  to easily retrieve them by their status (`Progress`, `Comment`, `Success`, `Warning`, `Error`).
+The raw response of an import will be processed into a `ImportResult` object. When an error was registered, it will
+become Falsly for easy checking. The `ImportResult` object will contain all the messages, including properties to
+easily retrieve them by their status (`Progress`, `Comment`, `Success`, `Warning`, `Error`).
 
-  The `ImportResult` object also includes all the updated that Relatics made to instances. They contain their ID and
-  possible ForeignKey. Properties are available to easily retrieve them by their action (`Add`, `Update`).
+The `ImportResult` object also includes all the updated that Relatics made to instances. They contain their ID and
+possible ForeignKey. Properties are available to easily retrieve them by their action (`Add`, `Update`).
 
-  When the `ImportResult` object is `print()`, it will display a formatted and human presentable outcome of the
-  import process. [^2]
+When the `ImportResult` object is `print()`, it will display a formatted and human presentable outcome of the import
+process. [^2]
 
 ## Exceptions
 
