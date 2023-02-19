@@ -41,7 +41,7 @@ setup(
     # list of available classifiers see
     # 'http://pypi.python.org/pypi?%3Aaction=list_classifiers'.
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
