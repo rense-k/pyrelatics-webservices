@@ -18,7 +18,7 @@ credentials_", "_Entry code_" and "_Unauthenticated_".
 
 setup(
     name="pyrelatics2",
-    version="0.1.1",
+    version="0.1.0",
     packages=[
         "pyrelatics2",
     ],
