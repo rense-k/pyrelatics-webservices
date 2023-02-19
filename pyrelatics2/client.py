@@ -214,7 +214,7 @@ class RelaticsWebservices:
             error_msg = suds_response.Export._Error  # pylint: disable=W0212
             log.info("Received an error response from the request: %s", error_msg)
 
-            if "Invalid import webservice" == error_msg or "Invalid receiving webservice" == error_msg:
+            if error_msg in {"Invalid import webservice", "Invalid receiving webservice"}:
                 raise InvalidOperationError(error_msg)
             if "No active workspace found for the given identifier." == error_msg:
                 raise InvalidWorkspaceError(error_msg)
