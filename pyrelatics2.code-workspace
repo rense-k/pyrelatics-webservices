@@ -14,10 +14,6 @@
 			"editor.rulers": [
 				119
 			],
-			// For editing setup.py
-			// "editor.rulers": [
-			// 	72, 119
-			// ],
 			"editor.codeActionsOnSave": {
 				"source.organizeImports": true
 			},
