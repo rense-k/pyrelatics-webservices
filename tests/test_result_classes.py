@@ -36,7 +36,7 @@ class TestImportResult(unittest.TestCase):
         # Act
         instance = ImportResult.from_suds(None)
 
-        determine_output_helper(instance)  # Handy way to find current results
+        # determine_output_helper(instance)  # Handy way to find current results
 
         # Assert
         self.assertEqual(
