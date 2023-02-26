@@ -15,19 +15,15 @@ from suds.sax.document import Document
 from suds.sax.element import Element
 from suds.sudsobject import Object as SudsObject
 
+from .constants import IMPORT_BASENAME, SUPPORTED_EXTENSIONS, TOKEN_PATH, USER_AGENT
 from .exceptions import TokenRequestError
 from .result_classes import ExportResult, ImportResult
 
 log = logging.getLogger(__name__)
 
+
 # Type aliases
 ParametersOrNone = None | dict[str, str]
-
-# Constants
-TOKEN_PATH = "/oauth2/token"
-USER_AGENT = "Python-pyrelatics_webservice/0.0.0"
-IMPORT_BASENAME = "pyrelatics_webservice"
-SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
 
 
 class ClientCredential:
@@ -208,7 +204,7 @@ class RelaticsWebservices:
     @staticmethod
     def _check_operation_name(operation_name: str) -> None:
         if operation_name == "":
-            raise ValueError("Supplied operationName is empty.")
+            raise ValueError("Supplied operation_name is empty.")
 
     @staticmethod
     def _generate_auth_parameter(authentication: None | str | ClientCredential = None) -> dict:
@@ -371,6 +367,7 @@ class RelaticsWebservices:
         """
         # Basic check of mandatory arguments
         self._check_operation_name(operation_name=operation_name)
+
         if not data:
             # Above "if" checks for both empty str or empty list,
             # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
