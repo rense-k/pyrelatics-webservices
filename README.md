@@ -1,6 +1,6 @@
 # PyRelatics2
 
-[![PyPI Python version][pypi-python-version-badge]][pypi-package] [![PyPI version][pypi-version-badge]][pypi-package] [![PyPI status][pypi-status-badge]][pypi-package] [![Apache-2.0 license][license-badge]][license] [![GitHub branch check state][github-workflow-status-pylint-badge]][github-link]
+[![PyPI Python version][pypi-python-version-badge]][pypi-package] [![PyPI version][pypi-version-badge]][pypi-package] [![PyPI status][pypi-status-badge]][pypi-package] [![Apache-2.0 license][license-badge]][license] [![GitHub branch check state][github-workflow-status-pylint-dev-badge]][github-link] [![GitHub branch check state][github-workflow-status-unittest-dev-badge]][github-link]
 
 Python package to interact with Relatics webservices.
 
@@ -194,6 +194,7 @@ Logging is available in these modules for debugging purpose: `pyrelatics2.client
 [pypi-status-badge]: https://img.shields.io/pypi/status/pyrelatics2
 [pypi-python-version-badge]: https://img.shields.io/pypi/pyversions/pyrelatics2
 [github-link]: https://github.com/rense-k/pyrelatics2
-[github-workflow-status-pylint-badge]: https://img.shields.io/github/actions/workflow/status/rense-k/pyrelatics2/pylint.yml?label=pylint
+[github-workflow-status-pylint-dev-badge]: https://img.shields.io/github/actions/workflow/status/rense-k/pyrelatics2/pylint.yml?branch=dev&label=pylint%20%40dev
+[github-workflow-status-unittest-dev-badge]: https://img.shields.io/github/actions/workflow/status/rense-k/pyrelatics2/unittest.yml?branch=dev&label=unittests%20%40dev
 [license]: ./LICENSE
 [license-badge]: https://img.shields.io/pypi/l/pyrelatics2?color=informational
