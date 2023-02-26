@@ -1,15 +1,134 @@
+import base64
 import dataclasses
 import datetime
+import io
 import logging
 import typing
+import zipfile
 
 from colorama import Fore, Style
+from suds.sax.text import Text
+from suds.sudsobject import Object as SudsObject
 
 # Type aliases
 ImportMessageStatus = typing.Literal["Progress", "Comment", "Success", "Warning", "Error"]
 ImportElementActions = typing.Literal["Add", "Update"]
 
 log = logging.getLogger(__name__)
+
+
+class BaseResult:  # pylint: disable=R0903
+    """
+    Base class with commonalities for the ExportResult and ImportResult classes.
+    """
+
+    has_error: bool = dataclasses.field(init=False)
+    error_msg: str = dataclasses.field(default=None)
+
+    def handle_suds_response_errors(self, suds_response: SudsObject) -> None:
+        """Handle processing of common error scenarios"""
+        if suds_response is None:
+            self.has_error = True
+            self.error_msg = ""
+            log.warning("Empty response received from the export request. This indicates an undefined error.")
+
+        # elif suds_response.Export._Error:
+        if hasattr(suds_response, "Export"):
+            self.has_error = True
+            if hasattr(suds_response.Export, "_Error"):
+                self.error_msg = str(suds_response.Export._Error)  # pylint: disable=W0212
+            else:
+                self.error_msg = repr()
+            log.info("Received an error response from the import request: %s", self.error_msg)
+
+
+# pylint: disable=W0212
+@dataclasses.dataclass(kw_only=True)
+class ExportResult(BaseResult):
+    """
+    Data class containing the result of a get_result.
+
+    Will evaluate as Falsy when an error response was received from the import request, otherwise Truthy.
+    """
+
+    data: SudsObject = dataclasses.field(init=False)
+    documents: dict[str, bytes] = dataclasses.field(default_factory=dict)
+
+    @staticmethod
+    def from_suds(suds_response: SudsObject) -> "ExportResult":
+        """
+        Parse raw suds response <sudsobject> for any documents and respond with a filled ExportResult object
+
+        Args:
+            suds_response : Raw <sudsobject> response from the import request
+
+        Response:
+            ExportResult : Parsed result of the export.
+        """
+        result = ExportResult()
+
+        # Handle common errors
+        result.handle_suds_response_errors(suds_response)
+
+        # Handle possibly received documents
+        if (
+            hasattr(suds_response, "Report")
+            and hasattr(suds_response.Report, "Documents")
+            and isinstance(suds_response.Report.Documents, Text)
+        ):
+            result.has_error = False
+
+            # The the base64 encoded contents as a zip file
+            result.documents: dict[str, bytes] = {}
+
+            with zipfile.ZipFile(io.BytesIO(base64.b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
+                for zipped_file in docs_zip.filelist:
+                    result.documents[zipped_file.filename] = docs_zip.read(zipped_file.filename)
+
+            # Cleanup variable without further use
+            del docs_zip
+            if "zipped_file" in locals():
+                del zipped_file  # pylint: disable=W0631
+
+            # Delete the Document node from the sudsobject
+            del suds_response.Report.Documents
+
+        # Store the SudsObject inside the result
+        result.data = suds_response
+
+        if not hasattr(suds_response, "Export") and not hasattr(suds_response, "Report"):
+            result.has_error = True
+            result.error_msg = repr(suds_response)
+            log.warning("Unrecognized response received from the export request.")
+
+        return result
+
+    def __bool__(self) -> bool:
+        return not self.has_error
+
+    def __str__(self) -> str:
+        result = ""
+
+        if self.has_error:
+            result += f"ERROR: {self.error_msg}\n"
+
+        if self.data:
+            result += "[Data]: \n"
+            result += str(self.data)
+            result += "\n"
+
+        if self.documents:
+            result += "[Documents]: \n"
+            result += Style.BRIGHT + "RelaticsFilename                              Size (bytes)\n" + Style.RESET_ALL
+            for key, value in self.documents.items():
+                result += f"{key:45} {len(value):>12}\n"
+        else:
+            result += "[Documents]: None\n"
+
+        return result
+
+
+# pylint: enable=W0212
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -58,15 +177,13 @@ class ImportElement:
 
 # pylint: disable=W0212
 @dataclasses.dataclass(kw_only=True)
-class ImportResult:
+class ImportResult(BaseResult):
     """
     Data class containing the result of an import
 
     Will evaluate as Falsy when an error response was received from the import request, otherwise Truthy.
     """
 
-    has_error: bool = dataclasses.field(init=False)
-    error_msg: str = dataclasses.field(init=False, default=None)
     messages: list[ImportMessage] = dataclasses.field(default_factory=list)
     elements: list[ImportElement] = dataclasses.field(default_factory=list)
     total_rows: int = dataclasses.field(init=False, default=None)
@@ -74,7 +191,7 @@ class ImportResult:
 
     # "ImportResult", see https://peps.python.org/pep-0484/#forward-references
     @staticmethod
-    def from_suds(suds_response) -> "ImportResult":
+    def from_suds(suds_response: SudsObject) -> "ImportResult":
         """
         Parse raw suds response <sudsobject> for messages and elements and respond with a filled ImportResult object
 
@@ -86,19 +203,8 @@ class ImportResult:
         """
         result = ImportResult()
 
-        if suds_response is None:
-            result.has_error = True
-            result.error_msg = ""
-            log.warning("Empty response received from the import request. This indicates an undefined error.")
-
-        # elif suds_response.Export._Error:
-        if hasattr(suds_response, "Export"):
-            result.has_error = True
-            if hasattr(suds_response.Export, "_Error"):
-                result.error_msg = str(suds_response.Export._Error)
-            else:
-                result.error_msg = repr()
-            log.info("Received an error response from the import request: %s", result.error_msg)
+        # Handle common errors
+        result.handle_suds_response_errors(suds_response)
 
         if hasattr(suds_response, "Import"):
             result.has_error = False
@@ -141,7 +247,7 @@ class ImportResult:
         result = ""
 
         if self.has_error:
-            result += f"ERROR: {self.error_msg}"
+            result += f"ERROR: {self.error_msg}\n"
 
         if self.total_rows is not None:
             result += f"Rows imported : {self.total_rows}\n"

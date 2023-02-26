@@ -29,15 +29,3 @@ class TokenRequestError(Exception):
 
     def __str__(self) -> str:
         return f"Token request failed: {self.error} ({self.error_description})"
-
-
-class InvalidOperationError(ValueError):
-    """
-    Custom exception class when a request was sent to an invalid operation.
-    """
-
-
-class InvalidWorkspaceError(ValueError):
-    """
-    Custom exception class when a request was sent for an invalid workspace.
-    """

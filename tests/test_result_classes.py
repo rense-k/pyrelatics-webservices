@@ -1,11 +1,11 @@
 """
-Testing the "import_result_classes.py" module
+Testing the "result_classes.py" module
 """
 import unittest
 
 from parameterized import parameterized
 
-from pyrelatics2.import_result_classes import ImportElement, ImportMessage
+from pyrelatics2.result_classes import ImportElement, ImportMessage
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
 

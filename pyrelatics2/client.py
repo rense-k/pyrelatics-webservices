@@ -1,7 +1,6 @@
 import base64
 import datetime
 import http.client
-import io
 import json
 import logging
 import os
@@ -14,11 +13,10 @@ from suds.client import Client
 from suds.plugin import MessagePlugin
 from suds.sax.document import Document
 from suds.sax.element import Element
-from suds.sax.text import Text
 from suds.sudsobject import Object as SudsObject
 
-from .exceptions import InvalidOperationError, InvalidWorkspaceError, TokenRequestError
-from .import_result_classes import ImportResult
+from .exceptions import TokenRequestError
+from .result_classes import ExportResult, ImportResult
 
 log = logging.getLogger(__name__)
 
@@ -208,18 +206,6 @@ class RelaticsWebservices:
             )
 
     @staticmethod
-    def _handle_response_errors(suds_response) -> None:
-        """Raise Exceptions for known errors"""
-        if suds_response is not None and hasattr(suds_response, "Export") and hasattr(suds_response.Export, "_Error"):
-            error_msg = suds_response.Export._Error  # pylint: disable=W0212
-            log.info("Received an error response from the request: %s", error_msg)
-
-            if error_msg in {"Invalid import webservice", "Invalid receiving webservice"}:
-                raise InvalidOperationError(error_msg)
-            if "No active workspace found for the given identifier." == error_msg:
-                raise InvalidWorkspaceError(error_msg)
-
-    @staticmethod
     def _check_operation_name(operation_name: str) -> None:
         if operation_name == "":
             raise ValueError("Supplied operationName is empty.")
@@ -238,8 +224,8 @@ class RelaticsWebservices:
         operation_name: str,
         parameters: ParametersOrNone = None,
         authentication: None | str | ClientCredential = None,
-        auto_handle_documents: bool = True,
-    ) -> SudsObject | tuple[SudsObject, dict[str, bytes]]:
+        auto_parse_response: bool = True,
+    ) -> ExportResult | SudsObject:
         """
         Retrieve results from a "Server for providing data" in Relatics, without checking any results
 
@@ -250,18 +236,11 @@ class RelaticsWebservices:
                              * None for no authentication,
                              * str for entryCode authentication or
                              * ClientCredential for OAuth2 client credentials
-            auto_handle_documents : When the result contains a document node, convert them to a dict for easy access
-
-        Raises:
-            InvalidOperationError: When an invalid operation_name is supplied
-            InvalidWorkspaceError: When an invalid workspace_id is supplied
+            auto_parse_response: Convert the return object, and parse for any documents, for easy access.
 
         Returns:
-            suds.sudsobject.Object : The retrieved data, when there were no documents that were handled
-            tuple[suds.sudsobject.Object, dict[str, bytes]] : When document were retrieved  and handled. The first part
-                                                              of the tuple contains the retrieved data. The second part
-                                                              of the tuple contains a dictionary of the documents, with
-                                                              their filename as the key and the contents as the value.
+            ExportResult : Result object when the retrieved response is parsed
+            suds.sudsobject.Object : The retrieved response, when not parsed
         """
         # Basic check of mandatory arguments
         self._check_operation_name(operation_name=operation_name)
@@ -289,37 +268,13 @@ class RelaticsWebservices:
             Authentication=self._generate_auth_parameter(authentication),
         )
 
-        # Raise Exceptions for known errors
-        self._handle_response_errors(suds_response=suds_response)
-
-        # Handle possibly received documents
-        if (
-            auto_handle_documents
-            and hasattr(suds_response, "Report")
-            and hasattr(suds_response.Report, "Documents")
-            and isinstance(suds_response.Report.Documents, Text)
-        ):
-            # The the base64 encoded contents as a zip file
-            documents_dict: dict[str, bytes] = {}
-
-            with zipfile.ZipFile(io.BytesIO(base64.b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
-                for zipped_file in docs_zip.filelist:
-                    documents_dict[zipped_file.filename] = docs_zip.read(zipped_file.filename)
-
-            # Cleanup variable without further use
-            del docs_zip
-            if "zipped_file" in locals():
-                del zipped_file  # pylint: disable=W0631
-
-            # Delete the Document node from the sudsobject
-            del suds_response.Report.Documents
-
-            result = (suds_response, documents_dict)
-
+        if auto_parse_response:
+            # Parse the raw response into something useful
+            export_result = ExportResult.from_suds(suds_response)
         else:
-            result = suds_response
+            export_result = suds_response
 
-        return result
+        return export_result
 
     @staticmethod
     def _generate_data_xml(data: list[dict[str, str]]) -> Document:
@@ -410,10 +365,6 @@ class RelaticsWebservices:
                 See https://kb.relaticsonline.com/published/ShowObject.aspx?Key=7126fb9d-58df-e311-9406-00155de0940e
             auto_parse_response : Convert the return object for easy access
 
-        Raises:
-            InvalidOperationError: When an invalid operation_name is supplied
-            InvalidWorkspaceError: When an invalid workspace_id is supplied
-
         Returns:
             ImportResult : Result object when the retrieved response is parsed
             suds.sudsobject.Object : The retrieved response, when not parsed
@@ -503,9 +454,6 @@ class RelaticsWebservices:
             Data=data_str,
         )
         # KNOWLEDGE: Convert sudsobject to dict: client.dict(sudsobject)
-
-        # Raise Exceptions for known errors
-        self._handle_response_errors(suds_response=suds_response)
 
         if auto_parse_response:
             # Parse the raw response into something useful

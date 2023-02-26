@@ -1,2 +1,3 @@
 from .client import ClientCredential, RelaticsWebservices
-from .exceptions import InvalidOperationError, InvalidWorkspaceError, TokenRequestError
+from .exceptions import TokenRequestError
+from .result_classes import ExportResult, ImportResult
