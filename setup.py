@@ -1,7 +1,10 @@
 from setuptools import setup
 
+from pyrelatics2.constants import PACKAGE_VERSION
+
 # with open("README.md", "r") as fh:
 #     long_description = fh.read()
+
 
 LONG_DESCRIPTION = """
 Python package to interact with Relatics webservices.
@@ -18,7 +21,7 @@ credentials_", "_Entry code_" and "_Unauthenticated_".
 
 setup(
     name="pyrelatics2",
-    version="0.2.0",
+    version=PACKAGE_VERSION,
     packages=[
         "pyrelatics2",
     ],
