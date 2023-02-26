@@ -4,7 +4,9 @@ import http.client
 import json
 import logging
 import os
+import platform
 import pprint
+import sys
 import tempfile
 import uuid
 import zipfile
@@ -15,15 +17,26 @@ from suds.sax.document import Document
 from suds.sax.element import Element
 from suds.sudsobject import Object as SudsObject
 
-from .constants import IMPORT_BASENAME, SUPPORTED_EXTENSIONS, TOKEN_PATH, USER_AGENT
 from .exceptions import TokenRequestError
 from .result_classes import ExportResult, ImportResult
+from .version import __version__
 
 log = logging.getLogger(__name__)
 
 
 # Type aliases
 ParametersOrNone = None | dict[str, str]
+
+# Constants
+TOKEN_PATH = "/oauth2/token"
+IMPORT_BASENAME = "pyrelatics_webservice"
+SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
+
+USER_AGENT = (
+    f"PyRelatics2/{__version__} "
+    f"({platform.platform()}; {platform.machine()}; python-{platform.python_version()}) "
+    f"{os.path.split(sys.modules['__main__'].__file__)[1]}"  # pylint: disable=E1101
+)
 
 
 class ClientCredential:
