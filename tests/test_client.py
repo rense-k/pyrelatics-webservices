@@ -1,6 +1,7 @@
 """
 Testing the "client.py" module
 """
+import os
 import unittest
 
 from pyrelatics2.client import USER_AGENT, RelaticsWebservices
@@ -84,11 +85,13 @@ class TestRelaticsWebservices(unittest.TestCase):
         self.assertEqual(str(context.exception), "Supplied data is empty.")
 
     def test_run_import_exception_documents_duplicates(self):
+        filename = "frequent-rehab-scary.jpg"
+
         with self.assertRaises(ValueError) as context:
             RelaticsWebservices("Python", "fb8267ee-8032-4557-8062-c48d5fd4ff9a").run_import(
                 operation_name="ascertain-pang-unripe",
                 data="tributary-maturely-recoil.xml",
-                documents=["frequent-rehab-scary.jpg", "pyramid-from-bagpipe\\frequent-rehab-scary.jpg"],
+                documents=[filename, os.path.join("pyramid-from-bagpipe", filename)],
             )
         self.assertEqual(str(context.exception), "Duplicate filenames in document list.")
 
