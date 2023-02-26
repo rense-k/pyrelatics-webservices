@@ -4,7 +4,7 @@ import pathlib
 # from setuptools import setup
 import setuptools
 
-long_description = ""
+long_description = ""  # pylint: disable=invalid-name
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description += fh.read()
 long_description += "\n"
