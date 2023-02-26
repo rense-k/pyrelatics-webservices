@@ -1,14 +1,16 @@
 """
 Testing the "result_classes.py" module
 """
+import logging
 import unittest
 
 from parameterized import parameterized
 
-# from pyrelatics2.result_classes import ExportResult, ImportResult
 from pyrelatics2.result_classes import ExportResult, ImportElement, ImportMessage, ImportResult
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
+
+logging.getLogger("pyrelatics2.result_classes").setLevel(logging.ERROR)
 
 
 def determine_output_helper(instance):
@@ -117,4 +119,5 @@ class TestImportElement(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)
