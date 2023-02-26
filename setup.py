@@ -1,9 +1,19 @@
-from setuptools import setup
+import os
+import pathlib
 
-from pyrelatics2.constants import PACKAGE_VERSION
+# from setuptools import setup
+import setuptools
 
 # with open("README.md", "r") as fh:
 #     long_description = fh.read()
+
+
+# Retrieve the __version__ from the pyrelatics2/version.py file,
+# in an other way than importing it (which doesn't work).
+version_filename = os.path.join(os.path.realpath(os.path.dirname(__file__)), "pyrelatics2", "version.py")
+version_content = pathlib.Path(version_filename).read_text("utf-8")
+version_compiled = compile(version_content, version_filename, "exec")
+exec(version_compiled)  # pylint: disable=exec-used
 
 
 LONG_DESCRIPTION = """
@@ -19,9 +29,9 @@ Three authentication methods are supported: "_OAuth 2.0 - Client
 credentials_", "_Entry code_" and "_Unauthenticated_".
 """
 
-setup(
+setuptools.setup(
     name="pyrelatics2",
-    version=PACKAGE_VERSION,
+    version=__version__,  # pylint: disable=undefined-variable # type: ignore
     packages=[
         "pyrelatics2",
     ],
