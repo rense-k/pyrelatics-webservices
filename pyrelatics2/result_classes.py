@@ -122,8 +122,6 @@ class ExportResult(BaseResult):
             result += Style.BRIGHT + "RelaticsFilename                              Size (bytes)\n" + Style.RESET_ALL
             for key, value in self.documents.items():
                 result += f"{key:45} {len(value):>12}\n"
-        else:
-            result += "[Documents]: None\n"
 
         return result
 
