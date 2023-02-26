@@ -142,31 +142,27 @@ client.run_import(operation_name="sample_operation", data=data, authentication=c
 
 ## Result of `get_result()`
 
-* When the report does not include ReferenceFile attributes, `get_result()` will return a `suds.sudsobject.Object`.
-* When the report does include a ReferenceFile attribute, `get_result()` will return a `tuple`. The first entry will
-  be the `suds.sudsobject.Object`. The second entry will be `dict`, where the keys are the filenames and the values
-  are the contents of the file. [^1]
+The raw response of an export  will be processed into a `ExportResult` object [^1]. When an error was registered, it
+will become Falsly for easy checking. The `ExportResult` object will contain any documents that were part of the
+response. They will be extracted from the raw base64 encoded zipfile in the original response, into a `dict`.
 
 ## Result of `run_import()`
 
-The raw response of an import will be processed into a `ImportResult` object. When an error was registered, it will
-become Falsly for easy checking. The `ImportResult` object will contain all the messages, including properties to
+The raw response of an import will be processed into a `ImportResult` object [^1]. When an error was registered, it
+will become Falsly for easy checking. The `ImportResult` object will contain all the messages, including properties to
 easily retrieve them by their status (`Progress`, `Comment`, `Success`, `Warning`, `Error`).
 
 The `ImportResult` object also includes all the updated that Relatics made to instances. They contain their ID and
 possible ForeignKey. Properties are available to easily retrieve them by their action (`Add`, `Update`).
 
 When the `ImportResult` object is `print()`, it will display a formatted and human presentable outcome of the import
-process. [^2]
+process.
 
 ## Exceptions
 
-In addition to basic Exceptions, there are some custom exceptions the code will raise:
+In addition to basic Exceptions, there is a custom exceptions the code will raise:
 
 * `TokenRequestError`: When the token for a "OAuth 2.0 - Client credentials" authentication could not be retrieved.
-* `InvalidWorkspaceError`: When Relatics responses that the given `workspace_id` is not valid.
-* `InvalidOperationError`: When Relatics indicates that the given `operation_name` does not exists in the given
-  `workspace_id`.
 
 ## Logging
 
@@ -182,11 +178,9 @@ logging.getLogger("pyrelatics2.client").setLevel(logging.DEBUG)
 ```
 
 Logging is available in these modules for debugging purpose: `pyrelatics2.client`, `pyrelatics2.exceptions` and
-`pyrelatics2.import_result_classes`.
+`pyrelatics2.result_classes`.
 
-[^1]: The handling of the ReferenceFiles can be turned off via the `auto_handle_documents=false` argument. In that case
-      the raw base64 encoded zip containing the documents will be part of the `suds.sudsobject.Object`.
-[^2]: Parsing of the raw response can be turned off via the `auto_parse_response=false` argument. In that case the
+[^1]: Parsing of the raw response can be turned off via the `auto_parse_response=false` argument. In that case the
       method will return the raw response in the form of a `suds.sudsobject.Object`
 
 [pypi-package]: https://pypi.org/project/pyrelatics2/
