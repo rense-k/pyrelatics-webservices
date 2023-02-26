@@ -6,15 +6,45 @@ import unittest
 from parameterized import parameterized
 
 # from pyrelatics2.result_classes import ExportResult, ImportResult
-from pyrelatics2.result_classes import ImportElement, ImportMessage
+from pyrelatics2.result_classes import ExportResult, ImportElement, ImportMessage, ImportResult
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
 
 
 def determine_output_helper(instance):
-    # Handy way to find current str() value
+    """Handy way to find current str() value"""
     print(f"\n> instance as repr: {repr(instance)}")
     print(f"> instance as str : {bytes(str(instance), 'utf-8')}")
+
+
+class TestExportResult(unittest.TestCase):
+    def test_from_suds_none(self):
+        # Arrange
+        # Act
+        instance = ExportResult.from_suds(None)
+
+        # determine_output_helper(instance)  # Handy way to find current results
+
+        # Assert
+        self.assertEqual(repr(instance), "ExportResult(data=None, documents={})", "wrong __repr__()")
+        self.assertEqual(str(instance), "ERROR: None\n", "wrong __str__()")
+
+
+class TestImportResult(unittest.TestCase):
+    def test_from_suds_none(self):
+        # Arrange
+        # Act
+        instance = ImportResult.from_suds(None)
+
+        determine_output_helper(instance)  # Handy way to find current results
+
+        # Assert
+        self.assertEqual(
+            repr(instance),
+            "ImportResult(messages=[], elements=[], total_rows=None, elapsed_time=None)",
+            "wrong __repr__()",
+        )
+        self.assertEqual(str(instance), "ERROR: None\n", "wrong __str__()")
 
 
 class TestImportMessage(unittest.TestCase):
