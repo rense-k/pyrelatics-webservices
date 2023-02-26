@@ -4,3 +4,4 @@ pylint
 wheel
 twine
 parameterized
+build
