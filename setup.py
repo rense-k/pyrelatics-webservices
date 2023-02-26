@@ -18,7 +18,7 @@ credentials_", "_Entry code_" and "_Unauthenticated_".
 
 setup(
     name="pyrelatics2",
-    version="0.1.1",
+    version="0.2.0",
     packages=[
         "pyrelatics2",
     ],
@@ -50,9 +50,9 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.10",
         "Topic :: Internet",
+        "Topic :: Software Development :: Libraries",
     ],
     keywords=["Relatics", "webservice", "soap-client", "oauth2"],
-    # test_suite="nose.collector",
-    # tests_require=["nose"],
-    # tests_require=["parameterized"], << Use this one
+    test_suite="tests",
+    tests_require=["parameterized"],
 )
