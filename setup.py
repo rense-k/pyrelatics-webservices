@@ -4,8 +4,12 @@ import pathlib
 # from setuptools import setup
 import setuptools
 
-# with open("README.md", "r") as fh:
-#     long_description = fh.read()
+long_description = ""
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description += fh.read()
+long_description += "\n"
+with open("CHANGELOG.md", "r", encoding="utf-8") as fh:
+    long_description += fh.read()
 
 
 # Retrieve the __version__ from the pyrelatics2/version.py file,
@@ -16,18 +20,18 @@ version_compiled = compile(version_content, version_filename, "exec")
 exec(version_compiled)  # pylint: disable=exec-used
 
 
-LONG_DESCRIPTION = """
-Python package to interact with Relatics webservices.
+# LONG_DESCRIPTION = """
+# Python package to interact with Relatics webservices.
 
-This package allows you to interact with Relatics webservices in two
-ways:
+# This package allows you to interact with Relatics webservices in two
+# ways:
 
-* Get data from a "Servers for providing data" webservice.
-* Submit data to a "Servers for receiving data" webservice.
+# * Get data from a "Servers for providing data" webservice.
+# * Submit data to a "Servers for receiving data" webservice.
 
-Three authentication methods are supported: "_OAuth 2.0 - Client
-credentials_", "_Entry code_" and "_Unauthenticated_".
-"""
+# Three authentication methods are supported: "_OAuth 2.0 - Client
+# credentials_", "_Entry code_" and "_Unauthenticated_".
+# """
 
 setuptools.setup(
     name="pyrelatics2",
@@ -47,7 +51,8 @@ setuptools.setup(
     author="Rense Klinkenberg",
     author_email="r@klinkenberg.ws",
     description="Python package to interact with Relatics webservices",
-    long_description=LONG_DESCRIPTION,
+    # long_description=LONG_DESCRIPTION,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires=">=3.10",
     # See PEP-301 for the classifier specification. For a complete
