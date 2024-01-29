@@ -229,13 +229,14 @@ class RelaticsWebservices:
 
         return auth
 
+    # pylint: disable=line-too-long
     @overload
     def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = True) -> ExportResult: ...
     @overload
     def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = False) -> SudsObject: ...
     @overload
     def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None) -> ExportResult: ...
-
+    # pylint: enable=line-too-long
     def get_result(
         self,
         operation_name: str,
