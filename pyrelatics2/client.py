@@ -10,6 +10,7 @@ import sys
 import tempfile
 import uuid
 import zipfile
+from typing import overload
 
 from suds.client import Client
 from suds.plugin import MessagePlugin
@@ -227,6 +228,15 @@ class RelaticsWebservices:
             auth = {"Authentication": {}}  # Default value, because Relatics doesn't like this to be empty
 
         return auth
+
+    @overload
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = True) -> ExportResult: ...
+    @overload
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool) -> ExportResult: ...
+    @overload
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None) -> ExportResult: ...
+    @overload
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = False) -> SudsObject: ...
 
     def get_result(
         self,
