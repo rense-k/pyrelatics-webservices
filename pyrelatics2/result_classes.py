@@ -27,7 +27,7 @@ class BaseResult:  # pylint: disable=R0903
     has_error: bool = False
     error_msg: str | None = None
 
-    def handle_suds_response_errors(self, suds_response: SudsObject | None) -> None:
+    def handle_suds_response_errors(self, suds_response: SudsObject) -> None:
         """Handle processing of common error scenarios"""
         if suds_response is None:
             self.has_error = True
@@ -40,7 +40,7 @@ class BaseResult:  # pylint: disable=R0903
             if hasattr(suds_response.Export, "_Error"):
                 self.error_msg = str(suds_response.Export._Error)  # pylint: disable=W0212
             else:
-                self.error_msg = ""
+                self.error_msg = repr()
             log.info("Received an error response from the import request: %s", self.error_msg)
 
 
@@ -81,7 +81,7 @@ class ExportResult(BaseResult):
             result.has_error = False
 
             # The the base64 encoded contents as a zip file
-            result.documents = {}
+            result.documents: dict[str, bytes] = {}
 
             with zipfile.ZipFile(io.BytesIO(base64.b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
                 for zipped_file in docs_zip.filelist:
@@ -137,7 +137,7 @@ class ImportMessage:
     Data class for a message in the result of an import
     """
 
-    time: datetime.time | str
+    time: datetime.time
     status: ImportMessageStatus
     message: str
     row: int
@@ -154,8 +154,7 @@ class ImportMessage:
         """
         Convert a date given as string into a date
         """
-        if isinstance(self.time, str):
-            self.time = datetime.time.fromisoformat(self.time)
+        self.time = datetime.time.fromisoformat(self.time)
 
     def __str__(self) -> str:
         status_color = self.status_fore_color[self.status]
@@ -285,31 +284,31 @@ class ImportResult(BaseResult):
 
     # ["Progress", "Comment", "Success", "Warning", "Error"]
     @property
-    def progress_messages(self) -> list[ImportMessage]:
+    def progress_messages(self) -> list[ImportElement]:
         """Get a list of all the progress messages"""
         return self.filter_messages("Progress")
 
     @property
-    def comment_messages(self) -> list[ImportMessage]:
+    def comment_messages(self) -> list[ImportElement]:
         """Get a list of all the comment messages"""
         return self.filter_messages("Comment")
 
     @property
-    def success_messages(self) -> list[ImportMessage]:
+    def success_messages(self) -> list[ImportElement]:
         """Get a list of all the comment messages"""
         return self.filter_messages("Success")
 
     @property
-    def warning_messages(self) -> list[ImportMessage]:
+    def warning_messages(self) -> list[ImportElement]:
         """Get a list of all the comment messages"""
         return self.filter_messages("Warning")
 
     @property
-    def error_messages(self) -> list[ImportMessage]:
+    def error_messages(self) -> list[ImportElement]:
         """Get a list of all the comment messages"""
         return self.filter_messages("Error")
 
-    def filter_elements(self, action: ImportElementActions) -> list[ImportElement]:
+    def filter_elements(self, action: ImportElementActions) -> list[ImportMessage]:
         """
         Return the list of elements with the given action
 
