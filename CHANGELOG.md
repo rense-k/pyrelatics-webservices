@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [x.y.z] - 2024-..-
+## [x.y.z] - 2024-..-..
 
 ### Added
 
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Marked type aliases explicit with `TypeAlias`.
+- Marked type aliasses explicit with `TypeAlias`.
 - Cleaned up default values for result dataclasses.
 - All result dataclasses now use `slots`.
 
