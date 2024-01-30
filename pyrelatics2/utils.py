@@ -85,7 +85,7 @@ def suds_get_as_str(obj: SudsObject | None, path: list[str]) -> str | None:
 
     Returns:
         The attribute value or None if not found. If the attribute was not a str, it will be
-        cast into a str. Beware to expect this behavior.
+        cast into a str. Beware to expect this behaviour.
     """
     if obj is None:
         return None
