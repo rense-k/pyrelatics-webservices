@@ -10,7 +10,7 @@ def suds_get(obj: SudsObject | None, path: list[str]) -> SudsObject | str | None
 
     Args:
         obj: The SudsObject to be queried
-      	path: The query path to the desired attribute
+        path: The query path to the desired attribute
 
     Returns:
         The attribute value or None if not found
@@ -44,7 +44,7 @@ def suds_get_as_list(obj: SudsObject | None, path: list[str]) -> list[SudsObject
 
     Args:
         obj: The SudsObject to be queried
-      	path: The query path to the desired attribute
+        path: The query path to the desired attribute
 
     Returns:
         The list containing the attribute values or an empty list if not found
@@ -80,7 +80,7 @@ def suds_get_as_str(obj: SudsObject | None, path: list[str]) -> str | None:
 
     Args:
         obj: The SudsObject to be queried
-      	path: The query path to the desired attribute
+        path: The query path to the desired attribute
 
     Returns:
         The attribute value or None if not found. If the attribute was not a str, it will be
