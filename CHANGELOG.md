@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added testing for Python 3.11 and 3.12, by which they are now supported.
 - Added overloads to `RelaticsWebservices.get_result()` and `RelaticsWebservices.run_import()` so linter knows the correct return type.
 - Added utility functions to easily travers a path in a Suds object.
+- Allow the workspace id in `RelaticsWebservices()` to be a `UUID`.
 
 ### Changed
 
