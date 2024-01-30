@@ -11,11 +11,9 @@ import tempfile
 import uuid
 import zipfile
 from typing import TypeAlias
-from typing import TypedDict
 from typing import overload
 
 from suds.client import Client
-from suds.plugin import MessageContext
 from suds.plugin import MessagePlugin
 from suds.sax.document import Document
 from suds.sax.element import Element
@@ -31,16 +29,6 @@ log = logging.getLogger(__name__)
 
 # Type aliases
 ParametersOrNone: TypeAlias = None | dict[str, str]
-
-
-class TokenData(TypedDict):
-    """Simple immutable dict containing token information"""
-
-    token: str
-    """The actual token"""
-    expires_on: datetime.datetime
-    """Expire time of the token"""
-
 
 # Constants
 TOKEN_PATH = "/oauth2/token"
@@ -63,14 +51,15 @@ class ClientCredential:
         client_secret : The OAuth2 client_secret
     """
 
-    client_id: str
-    client_secret: str
-    tokens: dict[str, TokenData]
-
     def __init__(self, client_id: str, client_secret: str):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.tokens = {}
+        self.tokens: dict(str, dict(str, str)) = {}
+
+        # self.tokens[hostname] = {
+        #     "token": "string with the actual token",
+        #     "expires_on": datetime object with the expire time,
+        # }
 
     def get_token(self, hostname: str, force_refresh: bool = False, user_agent: str = USER_AGENT) -> str:
         """
@@ -139,10 +128,10 @@ class ClientCredential:
             raise KeyError("Token request failed: No access_token was given.")
 
         # Store the token for later use
-        self.tokens[hostname] = TokenData(
-            token=response["access_token"],
-            expires_on=requested_on + datetime.timedelta(seconds=response["expires_in"]),
-        )
+        self.tokens[hostname] = {
+            "token": response["access_token"],
+            "expires_on": requested_on + datetime.timedelta(seconds=response["expires_in"]),
+        }
 
 
 class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
@@ -157,7 +146,7 @@ class AddParametersPlugin(MessagePlugin):  # pylint: disable=R0903
     def __init__(self, parameters: ParametersOrNone):
         self.parameters = parameters
 
-    def marshalled(self, context: MessageContext):
+    def marshalled(self, context):
         if self.parameters is not None:
             # Try to get "Parameters" element, or built when missing
             try:
