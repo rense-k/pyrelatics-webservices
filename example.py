@@ -18,7 +18,8 @@ LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 # logging.getLogger("suds.client").setLevel(logging.DEBUG)
-logging.getLogger("pyrelatics2.client").setLevel(logging.DEBUG)
+# logging.getLogger("pyrelatics2.client").setLevel(logging.DEBUG)
+logging.getLogger("pyrelatics2.client").setLevel(logging.INFO)
 
 
 cc = ClientCredential(
@@ -39,39 +40,39 @@ print(aaa)
 
 
 # ✅ DONE
-# bbb = relatics_webservice.get_result(
-#     operation_name="getActiesOauth2",
-#     parameters={"param1": "Hallo123_Oauth2"},
-#     authentication=cc,
-# )
-# print(f"Bool evaluation: {bool(bbb)}")
-# print(bbb)
+bbb = relatics_webservice.get_result(
+    operation_name="getActiesOauth2",
+    parameters={"param1": "Hallo123_Oauth2"},
+    authentication=cc,
+)
+print(f"Bool evaluation: {bool(bbb)}")
+print(bbb)
 
 
 # ✅ DONE
-# ccc = relatics_webservice.get_result(
-#     operation_name="getActiesNoAuth",
-#     parameters={"param1": "Hallo123_NoAuth"},
-#     authentication=None,
-# )
-# print(f"Bool evaluation: {bool(ccc)}")
-# print(ccc)
+ccc = relatics_webservice.get_result(
+    operation_name="getActiesNoAuth",
+    parameters={"param1": "Hallo123_NoAuth"},
+    authentication=None,
+)
+print(f"Bool evaluation: {bool(ccc)}")
+print(ccc)
 
-# relatics_webservice.keep_zip_file = True
+relatics_webservice.keep_zip_file = True
 
 
 # ✅ DONE
-# ddd = relatics_webservice.run_import(
-#     operation_name="importeerActiesEntrycode",
-#     data=[
-#         {"name": "Actie EntryCode 01", "description": "Testing 12345"},
-#         {"name": "Actie EntryCode 02", "description": "Testing 23456"},
-#     ],
-#     authentication="85477AF6F7A1B6CE797570648CF07037",
-#     file_name="import_ddd.xml",
-# )
-# print(f"Bool evaluation: {bool(ddd)}")
-# print(ddd)
+ddd = relatics_webservice.run_import(
+    operation_name="importeerActiesEntrycode",
+    data=[
+        {"name": "Actie EntryCode 01", "description": "Testing 12345"},
+        {"name": "Actie EntryCode 02", "description": "Testing 23456"},
+    ],
+    authentication="85477AF6F7A1B6CE797570648CF07037",
+    file_name="import_ddd.xml",
+)
+print(f"Bool evaluation: {bool(ddd)}")
+print(ddd)
 
 
 # ✅ DONE
