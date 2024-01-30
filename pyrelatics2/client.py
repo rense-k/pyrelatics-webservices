@@ -232,6 +232,7 @@ class RelaticsWebservices:
     """Optionally keep the created zipfile. For debugging purpose only"""
 
     _client: Client
+    _default_headers: dict[str, str]
 
     def __init__(self, company_subdomain: str, workspace_id: UUID | str, user_agent: str = USER_AGENT):
         # Check whether mandatory arguments are given
@@ -254,6 +255,7 @@ class RelaticsWebservices:
 
         # Initialize reusable instance variables
         self._client = Client(self.wsdl_url)
+        self._default_headers = {"User-Agent": self.user_agent}
 
     @property
     def wsdl_url(self) -> str:
@@ -284,6 +286,23 @@ class RelaticsWebservices:
             auth: dict[str, dict[str, str]] = {"Authentication": {}}
 
         return auth
+
+    def _setup_client_headers(self, authentication: None | str | ClientCredential) -> None:
+        """
+        Sets up the headers for in the client. Uses the default headers and includes bearer token for OAuth2.
+
+        Args:
+            authentication: The authentication used for the webservice
+        """
+        # Retrieve the default headers
+        headers = self._default_headers
+
+        # Add auth header for OAuth2 requests
+        if isinstance(authentication, ClientCredential):
+            headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
+
+        # Apply the headers
+        self._client.set_options(headers=headers)
 
     @overload
     def get_result(
@@ -340,17 +359,11 @@ class RelaticsWebservices:
         # Basic check of mandatory arguments
         self._check_operation_name(operation_name=operation_name)
 
-        headers = {"User-Agent": self.user_agent}
-
         # Add parameter plugin to handle parameters, when those are set
         if parameters is not None:
             self._client.set_options(plugins=[AddParametersPlugin(parameters)])
 
-        # Add auth header for OAuth2 requests
-        if isinstance(authentication, ClientCredential):
-            headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
-
-        self._client.set_options(headers=headers)
+        self._setup_client_headers(authentication)
 
         # Any parameters will be handled by the AddParametersPlugin, so don't pass them here
         # GetResult(xs:string Operation, Identification Identification, Parameters Parameters,
@@ -513,7 +526,6 @@ class RelaticsWebservices:
             if len({os.path.split(path)[1] for path in documents}) != len(documents):
                 raise ValueError("Duplicate filenames in document list.")
 
-        headers = {"User-Agent": self.user_agent}
         file_extension = None
 
         # Prepare the data part
@@ -566,11 +578,7 @@ class RelaticsWebservices:
                 with open(data, "rb") as data_file:
                     data_str = b64encode(data_file.read()).decode("utf-8")
 
-        # Add auth header for OAuth2 requests
-        if isinstance(authentication, ClientCredential):
-            headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
-
-        self._client.set_options(headers=headers)
+        self._setup_client_headers(authentication)
 
         # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename,
         #        xs:string Data)
