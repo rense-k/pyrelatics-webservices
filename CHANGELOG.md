@@ -10,36 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added testing for Python 3.11 and 3.12, by which they are now supported.
-- Added overloads to `RelaticsWebservices.get_result()` and `RelaticsWebservices.run_import()` so linter knows the correct return type
-
-### Changed
-
-- Marked type aliasses explicit with `TypeAlias`.
-- Cleaned up default values for result dataclasses.
-- All result dataclasses now use `slots`.
-
-### Internal
-
-- Upgraded github actions `checkout` to `v4` and `setup-python` to `v5` to support migration to node20.
 
 ## [0.2.2] - 2023-02-27
 
 ### Changed
 
-- Improves package release script to include `README.md` and `CHANGELOG.md`.
+- Improves package release script to include `README.md` and `CHANGELOG.md`
 
 ## [0.2.1] - 2023-02-26
 
 ### Changed
 
-- Improves package release mechanisme.
-- Expanded unit tests.
+- Improves package release mechanisme
+- Expanded unit tests
 
 ## [0.2.0] - 2023-02-26
 
 ### Added
 
-- Added some first unittests.
+- Added some first unittests
 
 ### Changed
 
