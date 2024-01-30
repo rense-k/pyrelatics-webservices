@@ -1,13 +1,12 @@
-from base64 import b64decode
+import base64
+import dataclasses
+import datetime
+import io
+import logging
+import typing
+import zipfile
 from dataclasses import dataclass
-from dataclasses import field
-from datetime import time
-from datetime import timedelta
-from io import BytesIO
-from logging import getLogger
-from typing import Literal
 from typing import TypeAlias
-from zipfile import ZipFile
 
 from colorama import Fore
 from colorama import Style
@@ -15,10 +14,10 @@ from suds.sax.text import Text
 from suds.sudsobject import Object as SudsObject
 
 # Type aliases
-ImportMessageStatus: TypeAlias = Literal["Progress", "Comment", "Success", "Warning", "Error"]
-ImportElementActions: TypeAlias = Literal["Add", "Update"]
+ImportMessageStatus: TypeAlias = typing.Literal["Progress", "Comment", "Success", "Warning", "Error"]
+ImportElementActions: TypeAlias = typing.Literal["Add", "Update"]
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class BaseResult:  # pylint: disable=R0903
@@ -47,7 +46,7 @@ class BaseResult:  # pylint: disable=R0903
 
 
 # pylint: disable=W0212
-@dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True, slots=True)
 class ExportResult(BaseResult):
     """
     Data class containing the result of a get_result.
@@ -56,7 +55,7 @@ class ExportResult(BaseResult):
     """
 
     data: SudsObject | None = None
-    documents: dict[str, bytes] = field(default_factory=dict)
+    documents: dict[str, bytes] = dataclasses.field(default_factory=dict)
 
     @staticmethod
     def from_suds(suds_response: SudsObject) -> "ExportResult":
@@ -85,7 +84,7 @@ class ExportResult(BaseResult):
             # The the base64 encoded contents as a zip file
             result.documents = {}
 
-            with ZipFile(BytesIO(b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
+            with zipfile.ZipFile(io.BytesIO(base64.b64decode(str(suds_response.Report.Documents))), "r") as docs_zip:
                 for zipped_file in docs_zip.filelist:
                     result.documents[zipped_file.filename] = docs_zip.read(zipped_file.filename)
 
@@ -133,13 +132,13 @@ class ExportResult(BaseResult):
 # pylint: enable=W0212
 
 
-@dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True, slots=True)
 class ImportMessage:
     """
     Data class for a message in the result of an import
     """
 
-    time: time | str
+    time: datetime.time | str
     status: ImportMessageStatus
     message: str
     row: int
@@ -157,14 +156,14 @@ class ImportMessage:
         Convert a date given as string into a date
         """
         if isinstance(self.time, str):
-            self.time = time.fromisoformat(self.time)
+            self.time = datetime.time.fromisoformat(self.time)
 
     def __str__(self) -> str:
         status_color = self.status_fore_color[self.status]
         return f"{self.time}  {self.row:05}  {status_color}{self.status:<8}{Fore.RESET}  {self.message}"
 
 
-@dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True, slots=True)
 class ImportElement:
     """
     Data class for a changed element in the result of an import
@@ -179,7 +178,7 @@ class ImportElement:
 
 
 # pylint: disable=W0212
-@dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True, slots=True)
 class ImportResult(BaseResult):
     """
     Data class containing the result of an import
@@ -187,10 +186,10 @@ class ImportResult(BaseResult):
     Will evaluate as Falsy when an error response was received from the import request, otherwise Truthy.
     """
 
-    messages: list[ImportMessage] = field(default_factory=list)
-    elements: list[ImportElement] = field(default_factory=list)
+    messages: list[ImportMessage] = dataclasses.field(default_factory=list)
+    elements: list[ImportElement] = dataclasses.field(default_factory=list)
     total_rows: int | None = None
-    elapsed_time: timedelta | None = None
+    elapsed_time: datetime.timedelta | None = None
 
     # "ImportResult", see https://peps.python.org/pep-0484/#forward-references
     @staticmethod
@@ -223,7 +222,7 @@ class ImportResult(BaseResult):
                         elif "Total rows imported:" in msg.value:
                             result.total_rows = int(msg.value[21:])
                         elif "Total time (ms):" in msg.value:
-                            result.elapsed_time = timedelta(milliseconds=int(msg.value[17:]))
+                            result.elapsed_time = datetime.timedelta(milliseconds=int(msg.value[17:]))
 
                     result.messages.append(
                         ImportMessage(time=msg._Time, status=msg._Result, message=msg.value, row=row)

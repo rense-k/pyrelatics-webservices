@@ -1,21 +1,18 @@
+import base64
+import datetime
+import http.client
 import json
+import logging
 import os
+import platform
+import pprint
 import sys
-from base64 import b64encode
-from datetime import datetime
-from datetime import timedelta
-from http.client import HTTPSConnection
-from logging import getLogger
-from platform import machine
-from platform import platform
-from platform import python_version
-from pprint import pformat
-from tempfile import gettempdir
+import tempfile
+import uuid
+import zipfile
 from typing import TypeAlias
 from typing import TypedDict
 from typing import overload
-from uuid import UUID
-from zipfile import ZipFile
 
 from suds.client import Client
 from suds.plugin import MessageContext
@@ -29,7 +26,7 @@ from .result_classes import ExportResult
 from .result_classes import ImportResult
 from .version import __version__
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 # Type aliases
@@ -41,7 +38,7 @@ class TokenData(TypedDict):
 
     token: str
     """The actual token"""
-    expires_on: datetime
+    expires_on: datetime.datetime
     """Expire time of the token"""
 
 
@@ -52,7 +49,7 @@ SUPPORTED_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "csv"]
 
 USER_AGENT = (
     f"PyRelatics2/{__version__} "
-    f"({platform()}; {machine()}; python-{python_version()}) "
+    f"({platform.platform()}; {platform.machine()}; python-{platform.python_version()}) "
     f"{os.path.split(sys.modules['__main__'].__file__)[1]}"  # pylint: disable=E1101
 )
 
@@ -92,7 +89,7 @@ class ClientCredential:
         if (
             force_refresh is True
             or hostname not in self.tokens
-            or (self.tokens[hostname]["expires_on"] - datetime.now()).seconds <= 300
+            or (self.tokens[hostname]["expires_on"] - datetime.datetime.now()).seconds <= 300
         ):
             log.info("No previous token for %s, retrieving new token", hostname)
             self.retrieve_token(hostname, user_agent)
@@ -113,8 +110,8 @@ class ClientCredential:
             RuntimeError: When Relatics sends back an error response
             KeyError: When there is no token in the response from Relatics
         """
-        requested_on = datetime.now()
-        auth_credentials = b64encode(bytes(f"{self.client_id}:{self.client_secret}", "utf-8"))
+        requested_on = datetime.datetime.now()
+        auth_credentials = base64.b64encode(bytes(f"{self.client_id}:{self.client_secret}", "utf-8"))
         payload = "grant_type=client_credentials"
         headers = {
             "Authorization": f"Basic {auth_credentials.decode('utf-8')}",
@@ -122,13 +119,13 @@ class ClientCredential:
             "User-Agent": user_agent,
         }
 
-        conn = HTTPSConnection(hostname)
+        conn = http.client.HTTPSConnection(hostname)
         conn.request("POST", TOKEN_PATH, payload, headers)
         res = conn.getresponse()
         data = res.read()
         response = json.loads(data.decode("utf-8"))
 
-        log.debug("Response from %s: %s", TOKEN_PATH, pformat(response, indent=2))
+        log.debug("Response from %s: %s", TOKEN_PATH, pprint.pformat(response, indent=2))
 
         if "error" in response:
             # Known errors:
@@ -144,7 +141,7 @@ class ClientCredential:
         # Store the token for later use
         self.tokens[hostname] = TokenData(
             token=response["access_token"],
-            expires_on=requested_on + timedelta(seconds=response["expires_in"]),
+            expires_on=requested_on + datetime.timedelta(seconds=response["expires_in"]),
         )
 
 
@@ -222,7 +219,7 @@ class RelaticsWebservices:
         # Check if workspace_id is a version ## GUID
         id_is_uuid: bool = True
         try:
-            UUID(workspace_id)
+            uuid.UUID(workspace_id)
         except ValueError:
             id_is_uuid = False
 
@@ -356,10 +353,10 @@ class RelaticsWebservices:
         keep_zip_file: bool,
     ) -> str:
         # Generate the full filename for the zip file
-        import_zip_path = os.path.join(gettempdir(), f"{file_basename}.zip")
+        import_zip_path = os.path.join(tempfile.gettempdir(), f"{file_basename}.zip")
 
         # Create the zip file
-        with ZipFile(import_zip_path, "w") as import_zip:
+        with zipfile.ZipFile(import_zip_path, "w") as import_zip:
             # Add all the supplied documents
             for document_path in documents:
                 archive_name = os.path.join("Documents", os.path.split(document_path)[1])
@@ -371,15 +368,15 @@ class RelaticsWebservices:
             elif isinstance(prepared_data, str):
                 import_zip.write(filename=prepared_data, arcname=os.path.split(prepared_data)[1])
 
-            # log.debug(f"Zip-file created {import_zip_path}: \n{pformat(import_zip.namelist(), indent=2)}")
-            log.debug("Zip-file created %s: \n%s", import_zip_path, pformat(import_zip.namelist(), indent=2))
+            # log.debug(f"Zip-file created {import_zip_path}: \n{pprint.pformat(import_zip.namelist(), indent=2)}")
+            log.debug("Zip-file created %s: \n%s", import_zip_path, pprint.pformat(import_zip.namelist(), indent=2))
 
         # Cleanup references to the ZipFile
         del import_zip
 
         # Convert zipfile to base64
         with open(import_zip_path, "rb") as import_zip_file:
-            data_str = b64encode(import_zip_file.read()).decode("utf-8")
+            data_str = base64.b64encode(import_zip_file.read()).decode("utf-8")
 
         # Remove the zip file from disk
         if not keep_zip_file:
@@ -527,12 +524,12 @@ class RelaticsWebservices:
         else:  # documents is None
             if isinstance(data, list):
                 # Convert previously generated xml to base64
-                data_str = b64encode(bytes(prepared_data.str(), "utf-8")).decode("utf-8")
+                data_str = base64.b64encode(bytes(prepared_data.str(), "utf-8")).decode("utf-8")
 
             elif isinstance(data, str):
                 # Convert supplied data file to base64
                 with open(data, "rb") as data_file:
-                    data_str = b64encode(data_file.read()).decode("utf-8")
+                    data_str = base64.b64encode(data_file.read()).decode("utf-8")
 
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):

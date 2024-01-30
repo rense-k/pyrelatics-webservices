@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded github actions `checkout` to `v4` and `setup-python` to `v5` to support migration to node20.
 - Actions only run when a `.py` file is changed.
-- Use `from x import y`  instead of `import x` and `x.y` for easier readable code.
 
 ## [0.2.2] - 2023-02-27
 

@@ -1,6 +1,6 @@
 from typing import overload
 
-from suds.sax.text import Text
+import suds
 from suds.sudsobject import Object as SudsObject
 
 
@@ -29,7 +29,7 @@ def suds_get(obj: SudsObject | None, path: str | list[str]) -> SudsObject | str 
         current = getattr(current, attribute_name, None)
 
     # Convert any sax.text objects into regular string
-    if isinstance(current, Text):  # type: ignore
+    if isinstance(current, suds.sax.text.Text):  # type: ignore
         current = str(current)
 
     # Return the result
