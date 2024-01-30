@@ -1,10 +1,6 @@
 name: Pylint
 
-on: 
-  push:
-    paths:
-    - "**.py"
-    - "**.yml"
+on: [push]
 
 jobs:
   build:
