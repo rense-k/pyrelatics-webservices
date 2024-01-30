@@ -1,7 +1,7 @@
 from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
-from datetime import time
+from datetime import time as dt_time
 from datetime import timedelta
 from io import BytesIO
 from logging import getLogger
@@ -139,7 +139,7 @@ class ImportMessage:
     Data class for a message in the result of an import
     """
 
-    time: time | str
+    time: dt_time | str
     status: ImportMessageStatus
     message: str
     row: int
@@ -157,7 +157,7 @@ class ImportMessage:
         Convert a date given as string into a date
         """
         if isinstance(self.time, str):
-            self.time = time.fromisoformat(self.time)
+            self.time = dt_time.fromisoformat(self.time)
 
     def __str__(self) -> str:
         status_color = self.status_fore_color[self.status]
