@@ -231,7 +231,7 @@ class RelaticsWebservices:
     keep_zip_file: bool
     """Optionally keep the created zipfile. For debugging purpose only"""
 
-    _client: Client
+    _client_cache: Client | None = None
     _default_headers: dict[str, str]
 
     def __init__(self, company_subdomain: str, workspace_id: UUID | str, user_agent: str = USER_AGENT):
@@ -254,7 +254,6 @@ class RelaticsWebservices:
         self.keep_zip_file = False  # Optionally keep the created zipfile. For debugging purpose only
 
         # Initialize reusable instance variables
-        self._client = Client(self.wsdl_url)
         self._default_headers = {"User-Agent": self.user_agent}
 
     @property
@@ -271,6 +270,14 @@ class RelaticsWebservices:
     def hostname(self) -> str:
         """The full hostname in the form: {company_subdomain}.relaticsonline.com"""
         return f"{self.company_subdomain.lower()}.relaticsonline.com"
+
+    @property
+    def _client(self) -> Client:
+        """The locally cached Client"""
+        if self._client_cache is None:
+            self._client_cache = Client(self.wsdl_url)
+
+        return self._client_cache
 
     @staticmethod
     def _check_operation_name(operation_name: str) -> None:
