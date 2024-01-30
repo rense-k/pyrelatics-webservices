@@ -19,7 +19,7 @@
 			// 	72, 119
 			// ],
 			"editor.codeActionsOnSave": {
-				"source.organizeImports": "explicit"
+				"source.organizeImports": true
 			},
 		},
 		"isort.args": [
