@@ -10,7 +10,7 @@ import sys
 import tempfile
 import uuid
 import zipfile
-from typing import overload, TypeAlias
+from typing import overload
 
 from suds.client import Client
 from suds.plugin import MessagePlugin
@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 
 
 # Type aliases
-ParametersOrNone: TypeAlias = None | dict[str, str]
+ParametersOrNone = None | dict[str, str]
 
 # Constants
 TOKEN_PATH = "/oauth2/token"
