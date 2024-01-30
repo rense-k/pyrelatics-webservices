@@ -22,8 +22,8 @@ class BaseResult:  # pylint: disable=R0903
     Base class with commonalities for the ExportResult and ImportResult classes.
     """
 
-    has_error: bool = False
-    error_msg: str | None = None
+    has_error: bool = dataclasses.field(init=False)
+    error_msg: str = dataclasses.field(default=None)
 
     def handle_suds_response_errors(self, suds_response: SudsObject) -> None:
         """Handle processing of common error scenarios"""
@@ -51,7 +51,7 @@ class ExportResult(BaseResult):
     Will evaluate as Falsy when an error response was received from the import request, otherwise Truthy.
     """
 
-    data: SudsObject | None = None
+    data: SudsObject = dataclasses.field(init=False)
     documents: dict[str, bytes] = dataclasses.field(default_factory=dict)
 
     @staticmethod
