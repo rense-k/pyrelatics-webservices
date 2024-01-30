@@ -43,6 +43,21 @@
         "default": true,
         "no-duplicate-heading": {"siblings_only": true}
     },
-    "editor.foldingImportsByDefault": true
+    "editor.foldingImportsByDefault": true,
+    "[toml]": {
+        "editor.formatOnSave": true
+    },
+    "evenBetterToml.formatter.allowedBlankLines": 2,
+    "evenBetterToml.formatter.alignEntries": true,
+    "evenBetterToml.formatter.alignComments": true,
+    "evenBetterToml.formatter.columnWidth": 119,
+    "evenBetterToml.formatter.arrayAutoExpand": true,
+    "evenBetterToml.formatter.inlineTableExpand": false,
+    "evenBetterToml.formatter.trailingNewline": true,
+    "evenBetterToml.formatter.arrayTrailingComma": false,
+    "evenBetterToml.formatter.arrayAutoCollapse": false,
+    "evenBetterToml.formatter.indentEntries": false,
+    "evenBetterToml.formatter.indentTables": false,
+    "evenBetterToml.formatter.indentString": "  "
 
 }
