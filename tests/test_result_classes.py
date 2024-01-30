@@ -6,10 +6,7 @@ import unittest
 
 from parameterized import parameterized
 
-from pyrelatics2.result_classes import ExportResult
-from pyrelatics2.result_classes import ImportElement
-from pyrelatics2.result_classes import ImportMessage
-from pyrelatics2.result_classes import ImportResult
+from pyrelatics2.result_classes import ExportResult, ImportElement, ImportMessage, ImportResult
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
 

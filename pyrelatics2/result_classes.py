@@ -7,8 +7,7 @@ import typing
 import zipfile
 from typing import TypeAlias
 
-from colorama import Fore
-from colorama import Style
+from colorama import Fore, Style
 from suds.sax.text import Text
 from suds.sudsobject import Object as SudsObject
 

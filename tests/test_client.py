@@ -4,8 +4,7 @@ Testing the "client.py" module
 import os
 import unittest
 
-from pyrelatics2.client import USER_AGENT
-from pyrelatics2.client import RelaticsWebservices
+from pyrelatics2.client import USER_AGENT, RelaticsWebservices
 
 # from parameterized import parameterized
 

@@ -4,12 +4,8 @@ Some examples on how to use the package
 import logging
 
 # pylint: disable=E0401,E0611, invalid-name
-from config import SAMPLE_CLIENT_ID  # type: ignore
-from config import SAMPLE_CLIENT_SECRET
-from config import SAMPLE_COMPANY
-from config import SAMPLE_WORKSPACE_ID
-from pyrelatics2 import ClientCredential
-from pyrelatics2 import RelaticsWebservices
+from config import SAMPLE_CLIENT_ID, SAMPLE_CLIENT_SECRET, SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID  # type: ignore
+from pyrelatics2 import ClientCredential, RelaticsWebservices
 
 # pylint: enable=E0401,E0611
 
