@@ -58,6 +58,6 @@
     "evenBetterToml.formatter.arrayAutoCollapse": false,
     "evenBetterToml.formatter.indentEntries": false,
     "evenBetterToml.formatter.indentTables": false,
-    "evenBetterToml.formatter.indentString": "  "
+    "evenBetterToml.formatter.indentString": "    ",
 
 }
