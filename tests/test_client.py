@@ -3,6 +3,7 @@ Testing the "client.py" module
 """
 import os
 import unittest
+from uuid import UUID
 
 from pyrelatics2.client import USER_AGENT
 from pyrelatics2.client import RelaticsWebservices
@@ -13,17 +14,32 @@ from pyrelatics2.client import RelaticsWebservices
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
 
 
-def determine_output_helper(instance):
+def determine_output_helper(instance: object):
     """Handy way to find current str() value"""
     print(f"\n> instance as repr: {repr(instance)}")
     print(f"> instance as str : {bytes(str(instance), 'utf-8')}")
 
 
 class TestRelaticsWebservices(unittest.TestCase):
-    def test_init_simple(self):
+    def test_init_simple_str(self):
         # Arrange
         # Act
         instance = RelaticsWebservices("Python", "9b167eea-d546-49c3-8cd0-1da09e7e9177")
+
+        # Assert
+        self.assertEqual(instance.hostname, "python.relaticsonline.com")
+        self.assertEqual(instance.wsdl_url, "https://python.relaticsonline.com/DataExchange.asmx?wsdl")
+        self.assertEqual(instance.workspace_id, "9b167eea-d546-49c3-8cd0-1da09e7e9177")
+        self.assertEqual(
+            repr(instance.identification), "{'Identification': {'Workspace': '9b167eea-d546-49c3-8cd0-1da09e7e9177'}}"
+        )
+        self.assertEqual(instance.user_agent, USER_AGENT)
+        self.assertEqual(instance.keep_zip_file, False)
+
+    def test_init_simple_uuid(self):
+        # Arrange
+        # Act
+        instance = RelaticsWebservices("Python", UUID("9b167eea-d546-49c3-8cd0-1da09e7e9177"))
 
         # Assert
         self.assertEqual(instance.hostname, "python.relaticsonline.com")
