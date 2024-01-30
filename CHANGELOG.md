@@ -18,10 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleaned up default values for result dataclasses.
 - All result dataclasses now use `slots`.
 
-## Fixed
-
-- Fix crash when Import returned a single element.
-
 ### Internal
 
 - Upgraded github actions `checkout` to `v4` and `setup-python` to `v5` to support migration to node20.
