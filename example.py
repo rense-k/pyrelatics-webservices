@@ -28,6 +28,7 @@ cc = ClientCredential(
 # SAMPLE_WORKSPACE_ID = "foo_bar"
 relatics_webservice = RelaticsWebservices(SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID)
 
+# ✅ DONE
 aaa = relatics_webservice.get_result(
     operation_name="getActiesEntrycode",
     parameters={"param1": "Hallo123_EntryCode"},
@@ -36,6 +37,8 @@ aaa = relatics_webservice.get_result(
 print(f"Bool evaluation: {bool(aaa)}")
 print(aaa)
 
+
+# ✅ DONE
 # bbb = relatics_webservice.get_result(
 #     operation_name="getActiesOauth2",
 #     parameters={"param1": "Hallo123_Oauth2"},
@@ -44,6 +47,8 @@ print(aaa)
 # print(f"Bool evaluation: {bool(bbb)}")
 # print(bbb)
 
+
+# ✅ DONE
 # ccc = relatics_webservice.get_result(
 #     operation_name="getActiesNoAuth",
 #     parameters={"param1": "Hallo123_NoAuth"},
@@ -54,6 +59,8 @@ print(aaa)
 
 # relatics_webservice.keep_zip_file = True
 
+
+# ✅ DONE
 # ddd = relatics_webservice.run_import(
 #     operation_name="importeerActiesEntrycode",
 #     data=[
@@ -66,6 +73,8 @@ print(aaa)
 # print(f"Bool evaluation: {bool(ddd)}")
 # print(ddd)
 
+
+# ✅ DONE
 # eee = relatics_webservice.run_import(
 #     operation_name="importeerActiesOAuth2Client",
 #     data=[
@@ -80,36 +89,58 @@ print(aaa)
 # print(eee)
 
 
+# ✅ DONE
 # fff = relatics_webservice.run_import(
 #     operation_name="importeerActiesNoAuth",
-#     # data=[
-#     #     {"name": "Actie NoAuth 01", "description": "Testing 12345"},
-#     #     {"name": "Actie NoAuth 02", "description": "Testing 23456"},
-#     # ],
-#     # data="sample-data\\sample_without_references.xlsx",
-#     # data=[
-#     #     {
-#     #         "name": "Actie Ref 01",
-#     #         "description": "Testing 12345",
-#     #         "Reference": "sample-data\\cms.zeEf4OrA-collection_cover.jpeg",
-#     #     },
-#     #     {
-#     #         "name": "Actie Ref 02",
-#     #         "description": "Testing 23456",
-#     #         "Reference": "sample-data\\pexels-ksenia-chernaya-3965543.jpg",
-#     #     },
-#     # ],
 #     data="sample-data\\sample_with_references.xlsx",
 #     authentication=None,
-#     # file_name="import_fff.xml",
 #     file_name="import_fff",
 #     documents=[
 #         "sample-data\\cms.zeEf4OrA-collection_cover.jpeg",
-#         # "sample-data\\global-warming.jpg",
 #         "sample-data\\pexels-ksenia-chernaya-3965543.jpg",
-#         # "sample-data\\pexels-pavel-danilyuk-8442886.jpg",
 #     ],
 # )
 # print("\n\n############################################   RESULT   ############################################")
 # print(f"Bool evaluation: {bool(fff)}")
 # print(fff)
+
+
+# ✅ DONE
+# ggg = relatics_webservice.run_import(
+#     operation_name="importeerActiesNoAuth",
+#     data="sample-data\\sample_without_references.xlsx",
+#     authentication=None,
+#     file_name="import_ggg.xml",
+# )
+# print("\n\n############################################   RESULT   ############################################")
+# print(f"Bool evaluation: {bool(ggg)}")
+# print(ggg)
+
+
+# ✅ DONE
+# hhh = relatics_webservice.run_import(
+#     operation_name="importeerActiesNoAuth",
+#     data=[
+#         {
+#             "name": "Actie Ref 01",
+#             "description": "Testing 12345",
+#             "Reference": "sample-data\\global-warming.jpg",
+#         },
+#         {
+#             "name": "Actie Ref 02",
+#             "description": "Testing 23456",
+#             "Reference": "sample-data\\pexels-pavel-danilyuk-8442886.jpg",
+#         },
+#     ],
+#     authentication=None,
+#     file_name="import_hhh",
+#     documents=[
+#         # "sample-data\\cms.zeEf4OrA-collection_cover.jpeg",
+#         "sample-data\\global-warming.jpg",
+#         # "sample-data\\pexels-ksenia-chernaya-3965543.jpg",
+#         "sample-data\\pexels-pavel-danilyuk-8442886.jpg",
+#     ],
+# )
+# print("\n\n############################################   RESULT   ############################################")
+# print(f"Bool evaluation: {bool(hhh)}")
+# print(hhh)
