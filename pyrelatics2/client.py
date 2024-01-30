@@ -57,23 +57,6 @@ USER_AGENT = (
 )
 
 
-def is_valid_uuid(s: str) -> bool:
-    """
-    Check if the given string can be converted into a valid UUID.
-
-    Args:
-        workspace_id: The string to be checked.
-
-    Returns:
-        True if the string can be converted into a valid UUID, False otherwise.
-    """
-    try:
-        UUID(s)
-        return True
-    except ValueError:
-        return False
-
-
 class ClientCredential:
     """
     Class containing OAuth2 client credentials and helper methods to get a token from the Relatics host.
@@ -222,48 +205,31 @@ class RelaticsWebservices:
 
     """
 
-    company_subdomain: str
-    """The company subdomain used in the full Relatics hostname"""
-    workspace_id: str
-    """The Relatics ID of the workspace to communicate with"""
-    user_agent: str
-    """The user agent that will show up in the Relatics webservice logs"""
-    keep_zip_file: bool
-    """Optionally keep the created zipfile. For debugging purpose only"""
+    def __init__(self, company_subdomain: str, workspace_id: str, user_agent: str = USER_AGENT):
+        self.hostname = f"{company_subdomain.lower()}.relaticsonline.com"
+        self.wsdl_url = f"https://{self.hostname}/DataExchange.asmx?wsdl"
+        self.workspace_id = workspace_id
+        self.identification = {"Identification": {"Workspace": workspace_id}}
+        self.user_agent = user_agent
+        self.keep_zip_file = False  # Optionally keep the created zipfile. For debugging purpose only
 
-    def __init__(self, company_subdomain: str, workspace_id: UUID | str, user_agent: str = USER_AGENT):
-        # Check whether mandatory arguments are given
+        # Check of mandatory arguments are given
         if company_subdomain == "":
             raise ValueError("The 'company_subdomain' can not be empty.")
         if workspace_id == "":
             raise ValueError("The 'workspace_id' can not be empty.")
 
-        # Check if supplied workspace_id str can be converted into a GUID
-        if isinstance(workspace_id, str) and not is_valid_uuid(workspace_id):
+        # Check if workspace_id is a version ## GUID
+        id_is_uuid: bool = True
+        try:
+            UUID(workspace_id)
+        except ValueError:
+            id_is_uuid = False
+
+        if id_is_uuid is False:
             log.warning(
                 "The supplied workspace ID isn't a GUID. Make sure the workspace has an overridden 'URL' in Relatics."
             )
-
-        # Store instance variables
-        self.company_subdomain = company_subdomain
-        self.workspace_id = str(workspace_id) if isinstance(workspace_id, UUID) else workspace_id
-        self.user_agent = user_agent
-        self.keep_zip_file = False  # Optionally keep the created zipfile. For debugging purpose only
-
-    @property
-    def wsdl_url(self) -> str:
-        """Return the complete WSDL url"""
-        return f"https://{self.hostname}/DataExchange.asmx?wsdl"
-
-    @property
-    def identification(self) -> dict[str, dict[str, str]]:
-        """Identification part of the soap request"""
-        return {"Identification": {"Workspace": self.workspace_id}}
-
-    @property
-    def hostname(self) -> str:
-        """The full hostname in the form: {company_subdomain}.relaticsonline.com"""
-        return f"{self.company_subdomain.lower()}.relaticsonline.com"
 
     @staticmethod
     def _check_operation_name(operation_name: str) -> None:
