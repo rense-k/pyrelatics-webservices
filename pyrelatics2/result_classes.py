@@ -5,7 +5,6 @@ import io
 import logging
 import typing
 import zipfile
-from dataclasses import dataclass
 from typing import TypeAlias
 
 from colorama import Fore

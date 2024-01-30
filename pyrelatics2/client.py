@@ -79,9 +79,9 @@ class ClientCredential:
         Args:
             hostname : The Relatics hostname from where the token should be get.
             force_refresh : When True, force a new token to be requested, instead of trying to reuse an
-                existing token. Defaults to False.
+                            existing token. Defaults to False.
             user_agent : The user-agent used in the http request to Relatics. Since this name will show up in the
-                logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
+                         logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
 
         Returns:
             str: Token for the given hostname
@@ -104,7 +104,7 @@ class ClientCredential:
         Args:
             hostname : The Relatics hostname from where the token should be get.
             user_agent : The user-agent used in the http request to Relatics. Since this name will show up in the
-                logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
+                         logs in Relatics, it can be useful to specify a custom value. Defaults to USER_AGENT.
 
         Raises:
             RuntimeError: When Relatics sends back an error response
@@ -198,7 +198,7 @@ class RelaticsWebservices:
         company_subdomain : The company's subdomain (before ".relaticsonline.com")
         workspace_id : The ID of the Relatics workspace were the request will be send to
         user_agent : The user agent sent as part of the request. Will show up in the webservice-log in Relatics. Can
-            be used to distinguished different applications.
+                     be used to distinguished different applications.
 
     """
 
@@ -287,9 +287,9 @@ class RelaticsWebservices:
             operation_name : The "OperationName" of the webservice to call
             parameters : The parameters to pass to the webservice
             authentication : Authentication for the webservice, either:
-                * None for no authentication,
-                * str for entryCode authentication or
-                * ClientCredential for OAuth2 client credentials
+                             * None for no authentication,
+                             * str for entryCode authentication or
+                             * ClientCredential for OAuth2 client credentials
             auto_parse_response: Convert the return object, and parse for any documents, for easy access.
 
         Returns:
@@ -430,29 +430,28 @@ class RelaticsWebservices:
         documents: None | list[str] = None,
         auto_parse_response: bool = True,
     ) -> ImportResult | SudsObject:
-        """
-        Retrieve results from a "Server for providing data" in Relatics, with checking of the results
+        """Retrieve results from a "Server for providing data" in Relatics, with checking of the results
 
         "data" can be given in the following formats:
         * a `str` with the name of the data file. Can be an Excel file or csv file.
         * a `list` of `dict[str, str]`, for example:
-            ```python
-            data=[
-                {"name": "Object 1", "description": "Lorem ipsum dolor sit amet."},
-                {"name": "Object 2", "description": "Ut enim ad minim veniam."},
-            ]
-            ```
+          ```python
+          data=[
+              {"name": "Object 1", "description": "Lorem ipsum dolor sit amet."},
+              {"name": "Object 2", "description": "Ut enim ad minim veniam."},
+          ]
+          ```
 
         Args:
             operation_name : The "OperationName" of the webservice to call
             data : The data to send to the import. See description above.
             authentication : Authentication for the webservice, either:
-                * None for no authentication,
-                * str for entryCode authentication or
-                * ClientCredential for OAuth2 client credentials
+                             * None for no authentication,
+                             * str for entryCode authentication or
+                             * ClientCredential for OAuth2 client credentials
             file_name : Filename send to Relatics. Will show up in the "Imported file" column in the import log. If
-                no extension is given or the extension doesn't match the supplied data, the correct extension will
-                be added
+                        no extension is given or the extension doesn't match the supplied data, the correct extension
+                        will be added
             documents : Optional list of filepaths to include in the import. Must be unique names.
                 See https://kb.relaticsonline.com/published/ShowObject.aspx?Key=7126fb9d-58df-e311-9406-00155de0940e
             auto_parse_response : Convert the return object for easy access
