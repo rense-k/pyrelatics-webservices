@@ -43,7 +43,7 @@ class BaseResult:  # pylint: disable=R0903
 
 
 # pylint: disable=W0212
-@dataclasses.dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True)
 class ExportResult(BaseResult):
     """
     Data class containing the result of a get_result.
@@ -129,7 +129,7 @@ class ExportResult(BaseResult):
 # pylint: enable=W0212
 
 
-@dataclasses.dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True)
 class ImportMessage:
     """
     Data class for a message in the result of an import
@@ -159,7 +159,7 @@ class ImportMessage:
         return f"{self.time}  {self.row:05}  {status_color}{self.status:<8}{Fore.RESET}  {self.message}"
 
 
-@dataclasses.dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True)
 class ImportElement:
     """
     Data class for a changed element in the result of an import
@@ -174,7 +174,7 @@ class ImportElement:
 
 
 # pylint: disable=W0212
-@dataclasses.dataclass(kw_only=True, slots=True)
+@dataclasses.dataclass(kw_only=True)
 class ImportResult(BaseResult):
     """
     Data class containing the result of an import
@@ -184,8 +184,8 @@ class ImportResult(BaseResult):
 
     messages: list[ImportMessage] = dataclasses.field(default_factory=list)
     elements: list[ImportElement] = dataclasses.field(default_factory=list)
-    total_rows: int | None = None
-    elapsed_time: datetime.timedelta | None = None
+    total_rows: int = dataclasses.field(init=False, default=None)
+    elapsed_time: datetime.timedelta = dataclasses.field(init=False, default=None)
 
     # "ImportResult", see https://peps.python.org/pep-0484/#forward-references
     @staticmethod
