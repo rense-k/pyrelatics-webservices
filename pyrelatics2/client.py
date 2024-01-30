@@ -348,14 +348,6 @@ class RelaticsWebservices:
 
         return data_str
 
-    # pylint: disable=line-too-long
-    @overload
-    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None, auto_parse_response: bool = True) -> ImportResult: ...
-    @overload
-    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None, auto_parse_response: bool = False) -> SudsObject: ...
-    @overload
-    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None) -> ImportResult: ...
-    # pylint: enable=line-too-long
     def run_import(
         self,
         operation_name: str,
