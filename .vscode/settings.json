@@ -42,7 +42,6 @@
     "markdownlint.config": {
         "default": true,
         "no-duplicate-heading": {"siblings_only": true}
-    },
-    "editor.foldingImportsByDefault": true
+    }
 
 }
