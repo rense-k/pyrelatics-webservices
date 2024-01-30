@@ -10,7 +10,8 @@ import sys
 import tempfile
 import uuid
 import zipfile
-from typing import overload, TypeAlias
+from typing import TypeAlias
+from typing import overload
 
 from suds.client import Client
 from suds.plugin import MessagePlugin
@@ -19,7 +20,8 @@ from suds.sax.element import Element
 from suds.sudsobject import Object as SudsObject
 
 from .exceptions import TokenRequestError
-from .result_classes import ExportResult, ImportResult
+from .result_classes import ExportResult
+from .result_classes import ImportResult
 from .version import __version__
 
 log = logging.getLogger(__name__)
