@@ -231,6 +231,8 @@ class RelaticsWebservices:
     keep_zip_file: bool
     """Optionally keep the created zipfile. For debugging purpose only"""
 
+    _client: Client
+
     def __init__(self, company_subdomain: str, workspace_id: UUID | str, user_agent: str = USER_AGENT):
         # Check whether mandatory arguments are given
         if company_subdomain == "":
@@ -249,6 +251,9 @@ class RelaticsWebservices:
         self.workspace_id = str(workspace_id) if isinstance(workspace_id, UUID) else workspace_id
         self.user_agent = user_agent
         self.keep_zip_file = False  # Optionally keep the created zipfile. For debugging purpose only
+
+        # Initialize reusable instance variables
+        self._client = Client(self.wsdl_url)
 
     @property
     def wsdl_url(self) -> str:
@@ -336,22 +341,21 @@ class RelaticsWebservices:
         self._check_operation_name(operation_name=operation_name)
 
         headers = {"User-Agent": self.user_agent}
-        client = Client(self.wsdl_url)
 
         # Add parameter plugin to handle parameters, when those are set
         if parameters is not None:
-            client.set_options(plugins=[AddParametersPlugin(parameters)])
+            self._client.set_options(plugins=[AddParametersPlugin(parameters)])
 
         # Add auth header for OAuth2 requests
         if isinstance(authentication, ClientCredential):
             headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
 
-        client.set_options(headers=headers)
+        self._client.set_options(headers=headers)
 
         # Any parameters will be handled by the AddParametersPlugin, so don't pass them here
         # GetResult(xs:string Operation, Identification Identification, Parameters Parameters,
         #           Authentication Authentication)
-        suds_response = client.service.GetResult(
+        suds_response = self._client.service.GetResult(
             Operation=operation_name,
             Identification=self.identification,
             Parameters=None,
@@ -512,8 +516,6 @@ class RelaticsWebservices:
         headers = {"User-Agent": self.user_agent}
         file_extension = None
 
-        client = Client(self.wsdl_url)
-
         # Prepare the data part
         if isinstance(data, list):
             # Set appropriate filename
@@ -568,18 +570,18 @@ class RelaticsWebservices:
         if isinstance(authentication, ClientCredential):
             headers["Authorization"] = f"Bearer {authentication.get_token(self.hostname)}"
 
-        client.set_options(headers=headers)
+        self._client.set_options(headers=headers)
 
         # Import(xs:string Operation, Identification Identification, Authentication Authentication, xs:string Filename,
         #        xs:string Data)
-        suds_response = client.service.Import(
+        suds_response = self._client.service.Import(
             Operation=operation_name,
             Identification=self.identification,
             Authentication=self._generate_auth_parameter(authentication),
             Filename=f"{file_basename}.{file_extension}",
             Data=data_str,
         )
-        # KNOWLEDGE: Convert sudsobject to dict: client.dict(sudsobject)
+        # KNOWLEDGE: Convert sudsobject to dict: self._client.dict(sudsobject)
 
         if auto_parse_response:
             # Parse the raw response into something useful
