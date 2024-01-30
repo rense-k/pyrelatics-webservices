@@ -3,19 +3,19 @@ line-length = 119
 
 [tool.isort]
 force_single_line = true
-line_length = 119
-profile = "black"
+line_length       = 119
+profile           = "black"
 
 [tool.pylint]
 max-line-length = 119
-max-args = 7                           # Default: 5
-max-locals = 20                        # Default: 15
-max-branches = 16                      # Default: 12
-disable = ["missing-module-docstring"]
+max-args        = 7                            # Default: 5
+max-locals      = 20                           # Default: 15
+max-branches    = 16                           # Default: 12
+disable         = ["missing-module-docstring"]
 
 
 [build-system]
-requires = ["setuptools"]
+requires      = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -40,19 +40,19 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Internet",
-    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries"
 ]
 
 [project.optional-dependencies]
 development = ["black", "isort", "pylint", "wheel", "twine"]
-tests = ["parameterized"]
+tests       = ["parameterized"]
 
 [project.urls]
 Homepage = "https://github.com/rense-k/pyrelatics2"
 # Documentation = "https://readthedocs.org"
 Repository = "https://github.com/rense-k/pyrelatics2.git"
-Issues = "https://github.com/rense-k/pyrelatics2/issues"
-Changelog = "https://github.com/rense-k/pyrelatics2/blob/dev/CHANGELOG.md"
+Issues     = "https://github.com/rense-k/pyrelatics2/issues"
+Changelog  = "https://github.com/rense-k/pyrelatics2/blob/dev/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = { attr = "pyrelatics2.version.__version__" }
