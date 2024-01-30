@@ -227,11 +227,7 @@ class ImportResult(BaseResult):
 
             # Add all the elements when available
             if hasattr(suds_response.Import, "Elements") and len(suds_response.Import.Elements) > 0:
-                # Force a single element into a list and None into an empty list
-                _elements = suds_response.Import.Elements[0]
-                elements = _elements if isinstance(_elements, list) else [] if _elements is None else [_elements]
-
-                for elem in elements:
+                for elem in suds_response.Import.Elements[0]:
                     result.elements.append(
                         ImportElement(action=elem._Action, id=elem._ID, foreign_key=elem._ForeignKey)
                     )
