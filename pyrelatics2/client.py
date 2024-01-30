@@ -383,6 +383,28 @@ class RelaticsWebservices:
 
         return export_result
 
+    def emulate_report(
+        self,
+        operation_name: str,
+        parameters: ParametersOrNone = None,
+        authentication: None | str | ClientCredential = None,
+        xslt_xml: str
+    ):
+        # TODO: Maybe move somewhere else, since this will probably require extra packages
+        # First, get the report content from the webservice
+        export_result = self.get_result(operation_name, parameters, authentication, True)
+
+        # Get the last_received() from the client
+        # response_xml = self._client.last_received()
+
+        # Get the raw xml
+        # response_xml.root().childAtPath("Body/GetResultResponse/GetResultResult").children[0].plain()
+
+        # How to actually perform a xslt, including any documents?
+        # `lxml` looks promising, and is actively updated: https://pypi.org/project/lxml/
+        # see: https://lxml.de/xpathxslt.html#xslt
+
+
     @staticmethod
     def _generate_data_xml(data: list[dict[str, str]]) -> Document:
         # Build data xml
