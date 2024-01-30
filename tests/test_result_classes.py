@@ -8,7 +8,9 @@ from parameterized import parameterized
 
 from pyrelatics2.result_classes import ExportResult
 from pyrelatics2.result_classes import ImportElement
+from pyrelatics2.result_classes import ImportElementActions
 from pyrelatics2.result_classes import ImportMessage
+from pyrelatics2.result_classes import ImportMessageStatus
 from pyrelatics2.result_classes import ImportResult
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
@@ -16,7 +18,7 @@ from pyrelatics2.result_classes import ImportResult
 logging.getLogger("pyrelatics2.result_classes").setLevel(logging.ERROR)
 
 
-def determine_output_helper(instance):
+def determine_output_helper(instance: object):
     """Handy way to find current str() value"""
     print(f"\n> instance as repr: {repr(instance)}")
     print(f"> instance as str : {bytes(str(instance), 'utf-8')}")
@@ -26,7 +28,7 @@ class TestExportResult(unittest.TestCase):
     def test_from_suds_none(self):
         # Arrange
         # Act
-        instance = ExportResult.from_suds(None)
+        instance = ExportResult.from_suds(None)  # type: ignore
 
         # determine_output_helper(instance)  # Handy way to find current results
 
@@ -39,7 +41,7 @@ class TestImportResult(unittest.TestCase):
     def test_from_suds_none(self):
         # Arrange
         # Act
-        instance = ImportResult.from_suds(None)
+        instance = ImportResult.from_suds(None)  # type: ignore
 
         # determine_output_helper(instance)  # Handy way to find current results
 
@@ -73,7 +75,9 @@ class TestImportMessage(unittest.TestCase):
             ),
         ]
     )
-    def test_import_message(self, time, status, message, row, expected_repr, expected_str):
+    def test_import_message(
+        self, time: str, status: ImportMessageStatus, message: str, row: int, expected_repr: str, expected_str: str
+    ):
         """Test the creation of an ImportMessage instance, including conversing the string time to a datetime.time"""
         # Arrange
         # Act
@@ -105,7 +109,9 @@ class TestImportElement(unittest.TestCase):
             ),
         ]
     )
-    def test_import_element(self, action, guid, foreign_key, expected_repr, expected_str):
+    def test_import_element(
+        self, action: ImportElementActions, guid: str, foreign_key: str, expected_repr: str, expected_str: str
+    ):
         """Test the creation of an ImportMessage instance, including conversing the string time to a datetime.time"""
         # Arrange
         # Act
