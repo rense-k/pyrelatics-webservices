@@ -3,7 +3,7 @@ Some examples on how to use the package
 """
 import logging
 
-# pylint: disable=E0401,E0611, invalid-name
+# pylint: disable=E0401,E0611
 from config import SAMPLE_CLIENT_ID, SAMPLE_CLIENT_SECRET, SAMPLE_COMPANY, SAMPLE_WORKSPACE_ID  # type: ignore
 from pyrelatics2 import ClientCredential, RelaticsWebservices
 
