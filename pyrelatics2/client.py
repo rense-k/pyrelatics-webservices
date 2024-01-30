@@ -237,15 +237,15 @@ class RelaticsWebservices:
             raise ValueError("Supplied operation_name is empty.")
 
     @staticmethod
-    def _generate_auth_parameter(authentication: None | str | ClientCredential = None) -> dict[str, dict[str, str]]:
+    def _generate_auth_parameter(authentication: None | str | ClientCredential = None) -> dict:
         if isinstance(authentication, str):
             auth = {"Authentication": {"Entrycode": authentication}}
         else:
-            # Default value, because Relatics doesn't like this to be empty
-            auth: dict[str, dict[str, str]] = {"Authentication": {}}
+            auth = {"Authentication": {}}  # Default value, because Relatics doesn't like this to be empty
 
         return auth
 
+    # pylint: disable=line-too-long
     @overload
     def get_result(
         self,
@@ -275,6 +275,7 @@ class RelaticsWebservices:
     ) -> ExportResult:
         ...
 
+    # pylint: enable=line-too-long
     def get_result(
         self,
         operation_name: str,
@@ -386,6 +387,7 @@ class RelaticsWebservices:
 
         return data_str
 
+    # pylint: disable=line-too-long
     @overload
     def run_import(
         self,
@@ -421,6 +423,7 @@ class RelaticsWebservices:
     ) -> ImportResult:
         ...
 
+    # pylint: enable=line-too-long
     def run_import(
         self,
         operation_name: str,
@@ -468,8 +471,6 @@ class RelaticsWebservices:
             # Above "if" checks for both empty str or empty list,
             # see https://docs.python.org/3/library/stdtypes.html#truth-value-testing
             raise ValueError("Supplied data is empty.")
-        if not isinstance(data, list) and not isinstance(data, str):
-            raise TypeError("Invalid type of data supplied.")
         if documents:
             # Detect duplicate names. Remove duplicate tails in the path with set(). Optimized with set comprehension.
             if len({os.path.split(path)[1] for path in documents}) != len(documents):
@@ -488,7 +489,7 @@ class RelaticsWebservices:
             # Build data xml
             prepared_data = self._generate_data_xml(data)
 
-        else:
+        elif isinstance(data, str):
             # Set appropriate filename, based on the given filename in "data"
             file_extension = os.path.splitext(data)[1][1:]
 
@@ -497,6 +498,9 @@ class RelaticsWebservices:
                 raise TypeError("Supplied file has unsupported file extension.")
 
             prepared_data = data
+
+        else:
+            raise TypeError("Invalid type of data supplied.")
 
         # Set appropriate filename
         if file_name is None:
@@ -525,7 +529,7 @@ class RelaticsWebservices:
                 # Convert previously generated xml to base64
                 data_str = b64encode(bytes(prepared_data.str(), "utf-8")).decode("utf-8")
 
-            else:
+            elif isinstance(data, str):
                 # Convert supplied data file to base64
                 with open(data, "rb") as data_file:
                     data_str = b64encode(data_file.read()).decode("utf-8")
