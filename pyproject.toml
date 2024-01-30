@@ -2,8 +2,15 @@
 line-length = 119
 
 [tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
+force_single_line = true
 line_length = 119
 profile = "black"
+
+[tool.pylint]
+max-line-length = 119
+disable = [
+    "C0114", # (missing-module-docstring)
+]
+max-args = 7  # Default: 5
+max-locals = 20  # Default: 15
+max-branches = 16  # Default: 12
