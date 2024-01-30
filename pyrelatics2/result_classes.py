@@ -5,15 +5,14 @@ import io
 import logging
 import typing
 import zipfile
-from typing import TypeAlias
 
 from colorama import Fore, Style
 from suds.sax.text import Text
 from suds.sudsobject import Object as SudsObject
 
 # Type aliases
-ImportMessageStatus: TypeAlias = typing.Literal["Progress", "Comment", "Success", "Warning", "Error"]
-ImportElementActions: TypeAlias = typing.Literal["Add", "Update"]
+ImportMessageStatus = typing.Literal["Progress", "Comment", "Success", "Warning", "Error"]
+ImportElementActions = typing.Literal["Add", "Update"]
 
 log = logging.getLogger(__name__)
 
