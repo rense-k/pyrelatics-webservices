@@ -231,34 +231,11 @@ class RelaticsWebservices:
 
     # pylint: disable=line-too-long
     @overload
-    def get_result(
-        self,
-        operation_name: str,
-        parameters: ParametersOrNone = None,
-        authentication: None | str | ClientCredential = None,
-        auto_parse_response: bool = True,
-    ) -> ExportResult:
-        ...
-
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = True) -> ExportResult: ...
     @overload
-    def get_result(
-        self,
-        operation_name: str,
-        parameters: ParametersOrNone = None,
-        authentication: None | str | ClientCredential = None,
-        auto_parse_response: bool = False,
-    ) -> SudsObject:
-        ...
-
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None, auto_parse_response: bool = False) -> SudsObject: ...
     @overload
-    def get_result(
-        self,
-        operation_name: str,
-        parameters: ParametersOrNone = None,
-        authentication: None | str | ClientCredential = None,
-    ) -> ExportResult:
-        ...
-
+    def get_result(self, operation_name: str, parameters: ParametersOrNone = None, authentication: None | str | ClientCredential = None) -> ExportResult: ...
     # pylint: enable=line-too-long
     def get_result(
         self,
@@ -373,40 +350,11 @@ class RelaticsWebservices:
 
     # pylint: disable=line-too-long
     @overload
-    def run_import(
-        self,
-        operation_name: str,
-        data: str | list[dict[str, str]],
-        authentication: None | str | ClientCredential = None,
-        file_name: None | str = None,
-        documents: None | list[str] = None,
-        auto_parse_response: bool = True,
-    ) -> ImportResult:
-        ...
-
+    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None, auto_parse_response: bool = True) -> ImportResult: ...
     @overload
-    def run_import(
-        self,
-        operation_name: str,
-        data: str | list[dict[str, str]],
-        authentication: None | str | ClientCredential = None,
-        file_name: None | str = None,
-        documents: None | list[str] = None,
-        auto_parse_response: bool = False,
-    ) -> SudsObject:
-        ...
-
+    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None, auto_parse_response: bool = False) -> SudsObject: ...
     @overload
-    def run_import(
-        self,
-        operation_name: str,
-        data: str | list[dict[str, str]],
-        authentication: None | str | ClientCredential = None,
-        file_name: None | str = None,
-        documents: None | list[str] = None,
-    ) -> ImportResult:
-        ...
-
+    def run_import(self, operation_name: str, data: str | list[dict[str, str]], authentication: None | str | ClientCredential = None, file_name: None | str = None, documents: None | list[str] = None) -> ImportResult: ...
     # pylint: enable=line-too-long
     def run_import(
         self,
