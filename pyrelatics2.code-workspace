@@ -11,7 +11,8 @@
 			"PYTHONPATH",
 			"VVRGL",
 			"xlsb",
-			"ZSBPQXV"
+			"ZSBPQXV",
+			"pyproject"
 		],
 		"terminal.integrated.env.windows": {
 			"PYTHONPATH": ".;..;${PYTHONPATH}"
