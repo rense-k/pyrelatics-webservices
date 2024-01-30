@@ -1,7 +1,7 @@
-import logging
-import pprint
+from logging import getLogger
+from pprint import pformat
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 class TokenRequestError(Exception):
@@ -24,7 +24,7 @@ class TokenRequestError(Exception):
             "Token request failed: %s (%s) | %s",
             self.error,
             self.error_description,
-            pprint.pformat(self.response_dict, indent=2),
+            pformat(self.response_dict, indent=2),
         )
 
     def __str__(self) -> str:
