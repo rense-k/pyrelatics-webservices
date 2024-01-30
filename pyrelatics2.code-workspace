@@ -5,16 +5,45 @@
 		}
 	],
 	"settings": {
+		"python.formatting.provider": "black",
+		"editor.rulers": [
+			119
+		],
+		"[python]": {
+			"editor.formatOnSave": true,
+			"editor.rulers": [
+				119
+			],
+			// For editing setup.py
+			// "editor.rulers": [
+			// 	72, 119
+			// ],
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": "explicit"
+			},
+		},
+		"isort.args": [
+			"--profile",
+			"black"
+		],
 		"cSpell.words": [
 			"Eltc",
 			"PSJBY",
-			"PYTHONPATH",
 			"VVRGL",
 			"xlsb",
 			"ZSBPQXV"
 		],
+		"files.exclude": {
+			"**/__pycache__": true
+		},
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
 		"terminal.integrated.env.windows": {
 			"PYTHONPATH": ".;..;${PYTHONPATH}"
 		},
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": []
 	}
 }

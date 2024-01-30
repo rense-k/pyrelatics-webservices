@@ -1,0 +1,20 @@
+[FORMAT]
+# See: https://docs.pylint.org/features.html#id6
+max-line-length=120
+max-args = 7  # Default: 5
+max-locals = 20  # Default: 15
+max-branches = 16  # Default: 12
+
+
+[MESSAGES CONTROL]
+
+# Enable the message, report, category or checker with the given id(s). You can
+# either give multiple identifier separated by comma (,) or put this option
+# multiple time.
+#enable=
+
+# Disable the message, report, category or checker with the given id(s). You
+# can either give multiple identifier separated by comma (,) or put this option
+# multiple time (only on the command line, not in the configuration file where
+# it should appear only once).
+disable=missing-module-docstring

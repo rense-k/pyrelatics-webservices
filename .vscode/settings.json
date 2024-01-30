@@ -1,11 +1,6 @@
 {
-    "editor.rulers": [
-        119
-    ],
-    "editor.stickyScroll.enabled": true,
-    "files.exclude": {
-        "**/__pycache__": true
-    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
     "python.testing.unittestArgs": [
         "-v",
         "-s",
@@ -15,30 +10,4 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "strict",
-    "python.analysis.autoFormatStrings": true,
-    // "python.analysis.inlayHints.callArgumentNames": "all",
-    // "python.analysis.inlayHints.functionReturnTypes": true,
-    // "python.analysis.inlayHints.pytestParameters": true,
-    "python.analysis.inlayHints.variableTypes": true,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        },
-    },
-    "[markdown]": {
-        "files.trimTrailingWhitespace": false,
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": true
-    },
-    "markdown.validate.enabled": true,
-    "markdown.occurrencesHighlight.enabled": false,
-    "markdownlint.config": {
-        "default": true,
-        "no-duplicate-heading": {"siblings_only": true}
-    }
-
 }
