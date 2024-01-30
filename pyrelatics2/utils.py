@@ -4,7 +4,7 @@ import suds
 from suds.sudsobject import Object as SudsObject
 
 
-def suds_get(obj: SudsObject | None, path: list[str]) -> SudsObject | str | None | list[SudsObject]:
+def suds_get(obj: SudsObject | None, path: str | list[str]) -> SudsObject | str | None | list[SudsObject]:
     """
     Safely get the attribute with the given path from a SudsObject. Additionally convert any sax.text object
     into a regular string.
@@ -36,7 +36,7 @@ def suds_get(obj: SudsObject | None, path: list[str]) -> SudsObject | str | None
     return current
 
 
-def suds_get_as_list(obj: SudsObject | None, path: list[str]) -> list[SudsObject] | list[SudsObject | str]:
+def suds_get_as_list(obj: SudsObject | None, path: str | list[str]) -> list[SudsObject] | list[SudsObject | str]:
     """
     Safely get the attribute with the given path from a SudsObject and return is as a list.
 
@@ -66,16 +66,16 @@ def suds_get_as_list(obj: SudsObject | None, path: list[str]) -> list[SudsObject
 
 
 @overload
-def suds_get_as_str(obj: SudsObject, path: list[str]) -> str:
+def suds_get_as_str(obj: SudsObject, path: str | list[str]) -> str:
     ...
 
 
 @overload
-def suds_get_as_str(obj: None, path: list[str]) -> None:
+def suds_get_as_str(obj: None, path: str | list[str]) -> None:
     ...
 
 
-def suds_get_as_str(obj: SudsObject | None, path: list[str]) -> str | None:
+def suds_get_as_str(obj: SudsObject | None, path: str | list[str]) -> str | None:
     """
     Safely get the attribute with the given path from a SudsObject and return is as a string.
 
