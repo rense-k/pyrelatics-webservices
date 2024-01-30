@@ -1,5 +1,5 @@
-from typing import overload
 import suds
+from typing import overload
 from suds.sudsobject import Object as SudsObject
 
 
