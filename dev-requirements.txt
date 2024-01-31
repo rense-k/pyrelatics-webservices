@@ -5,3 +5,4 @@ wheel
 twine
 parameterized
 build
+coverage

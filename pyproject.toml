@@ -44,7 +44,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-development = ["black", "isort", "pylint", "wheel", "twine"]
+development = ["black", "isort", "pylint", "wheel", "twine", "coverage"]
 tests       = ["parameterized"]
 
 [project.urls]
@@ -56,3 +56,7 @@ Changelog  = "https://github.com/rense-k/pyrelatics2/blob/dev/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = { attr = "pyrelatics2.version.__version__" }
+
+
+[tool.coverage.run]
+dynamic_context = "test_function"
