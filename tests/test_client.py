@@ -11,9 +11,6 @@ from pyrelatics2.client import USER_AGENT
 from pyrelatics2.client import RelaticsWebservices
 from pyrelatics2.client import is_valid_uuid
 
-# from parameterized import parameterized
-
-
 # pylint: disable=missing-class-docstring,missing-function-docstring,line-too-long,too-few-public-methods
 
 
