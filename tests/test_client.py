@@ -5,8 +5,11 @@ import os
 import unittest
 from uuid import UUID
 
+from parameterized import parameterized
+
 from pyrelatics2.client import USER_AGENT
 from pyrelatics2.client import RelaticsWebservices
+from pyrelatics2.client import is_valid_uuid
 
 # from parameterized import parameterized
 
@@ -21,6 +24,20 @@ def determine_output_helper(instance: object):
 
 
 class TestRelaticsWebservices(unittest.TestCase):
+    @parameterized.expand(
+        [
+            ("", False),
+            ("9b167eea-d546-49c3-8cd0-1da09e7e9177", True),
+        ]
+    )
+    def test_is_valid_uuid(self, input_s: str, expected_result: bool):
+        # Arrange
+        # Act
+        result = is_valid_uuid(input_s)
+
+        # Assert
+        self.assertEqual(result, expected_result)
+
     def test_init_simple_str(self):
         # Arrange
         # Act
