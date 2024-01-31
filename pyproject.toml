@@ -60,3 +60,6 @@ version = { attr = "pyrelatics2.version.__version__" }
 
 [tool.coverage.run]
 dynamic_context = "test_function"
+
+[tool.coverage.report]
+exclude_also = ["\\.\\.\\.", "log\\."]
